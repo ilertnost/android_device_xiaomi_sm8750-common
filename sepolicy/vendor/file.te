@@ -10,6 +10,9 @@ type camlog_device, dev_type;
 type sys_thermal_flash_state, fs_type, sysfs_type;
 type sys_thermal_torch_real_level, fs_type, sysfs_type;
 type sysfs_csiphy_umd_paras, fs_type, sysfs_type;
+type vendor_camera_proc, fs_type, proc_type;
+type vendor_camera_sysfs, fs_type, sysfs_type;
+type vendor_miev_device, dev_type;
 
 # Charger
 type vendor_sysfs_xm_power, sysfs_type, fs_type;

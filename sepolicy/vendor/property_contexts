@@ -220,8 +220,17 @@ ro.vendor.oem.serialno u:object_r:vendor_deviceid_prop:s0
 ro.vendor.oem.sno u:object_r:vendor_sno_prop:s0
 
 # Sensor
+persist.vendor.darkcal. u:object_r:vendor_sensors_prop:s0
+persist.vendor.debug.collision. u:object_r:vendor_sensors_prop:s0
+persist.vendor.debug.cwb.disable u:object_r:vendor_sensors_prop:s0
+persist.vendor.debug.dc.disable u:object_r:vendor_sensors_prop:s0
+persist.vendor.debug.qshcalapi u:object_r:vendor_sensors_prop:s0
 persist.vendor.sensor.mischeck u:object_r:vendor_mischeck_prop:s0
+persist.vendor.sensor.use_xiaomi_hall u:object_r:vendor_sensors_prop:s0
 persist.vendor.sensors.used.framebuffer u:object_r:vendor_usedframebuffer_prop:s0
+ro.boot.factorybuild u:object_r:vendor_sensors_prop:s0
+ro.vendor.proxcal.factor u:object_r:vendor_sensors_prop:s0
+ro.vendor.sensor. u:object_r:vendor_sensors_prop:s0
 
 # SLA
 vendor.sla.enabled u:object_r:vendor_slad_prop:s0
