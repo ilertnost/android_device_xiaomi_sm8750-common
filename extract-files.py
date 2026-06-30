@@ -32,6 +32,9 @@ namespace_imports = [
 def lib_fixup_vendor_suffix(lib: str, partition: str, *args, **kwargs):
     return f'{lib}-{partition}' if partition == 'vendor' else None
 
+def lib_fixup_qcc_partition(lib: str, partition: str, *args, **kwargs):
+    return f'{lib}_{partition}' if partition == 'system_ext' else None
+
 lib_fixups: lib_fixups_user_type = {
     **lib_fixups,
     (
@@ -39,6 +42,10 @@ lib_fixups: lib_fixups_user_type = {
         'libmialgo',
         'libaudioserviceexampleimpl',
     ): lib_fixup_remove,
+    (
+        'vendor.qti.qccsyshal_aidl-V1-ndk',
+        'vendor.qti.qccvndhal_aidl-V1-ndk',
+    ): lib_fixup_qcc_partition,
 }
 
 blob_fixups: blob_fixups_user_type = {
@@ -86,6 +93,14 @@ blob_fixups: blob_fixups_user_type = {
         'vendor/lib64/libqti-perfd.so',
     ): blob_fixup()
         .replace_needed('vendor.qti.hardware.display.config-V5-ndk.so', 'vendor.qti.hardware.display.config-V12-ndk.so'),
+    (
+        'system_ext/lib64/vendor.qti.hardware.qccsyshal@1.2-halimpl.so',
+    ): blob_fixup()
+        .replace_needed('libprotobuf-cpp-full.so', 'libprotobuf-cpp-qccx.so'),
+    (
+        'system_ext/lib64/libprotobuf-cpp-qccx.so',
+    ): blob_fixup()
+        .fix_soname(),
     (
         'vendor/lib64/libapengine.so',
     ): blob_fixup()
