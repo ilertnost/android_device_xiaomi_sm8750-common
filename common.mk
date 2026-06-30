@@ -127,6 +127,7 @@ PRODUCT_PACKAGES += \
 
 # Fingerprint
 PRODUCT_PACKAGES += \
+    AHBF-V3-service.xml \
     mfp-daemon
 
 PRODUCT_COPY_FILES += \
