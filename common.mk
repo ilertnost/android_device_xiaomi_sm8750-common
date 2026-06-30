@@ -159,10 +159,14 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     android.hardware.graphics.mapper@4.0-impl-qti-display \
     libgralloc.qti \
-    vendor.qti.hardware.display.allocator-service \
     vendor.qti.hardware.display.composer-service \
     vendor.qti.hardware.display.config-V12-ndk.vendor \
     vendor.qti.hardware.memtrack-service
+
+ifneq ($(TARGET_USES_PREBUILT_DISPLAY_ALLOCATOR),true)
+PRODUCT_PACKAGES += \
+    vendor.qti.hardware.display.allocator-service
+endif
 
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.opengles.aep.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.opengles.aep.xml \
