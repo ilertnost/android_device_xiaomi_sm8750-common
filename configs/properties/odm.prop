@@ -49,7 +49,6 @@ debug.config.video.hevchdr10.encode.support=true
 debug.config.video.p3.encode.support=true
 debug.config.video.p3.decode.support=true
 persist.vendor.low.cutoff=true
-ro.camera.disableJpegR=true
 ro.camera.disableHeicUltraHDR=true
 ro.camerax.extensions.enabled=true
 ro.product.camera.livephoto.support=3
