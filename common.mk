@@ -26,8 +26,12 @@ $(call inherit-product, packages/modules/Virtualization/apex/product_packages.mk
 $(call inherit-product, hardware/qcom-caf/common/common.mk)
 
 # SHIPPING API
-BOARD_SHIPPING_API_LEVEL := 202504
-PRODUCT_SHIPPING_API_LEVEL := 36
+# The Android 16 OS3 base retains vendor ABI level 35
+# (ro.vendor.build.version.sdk=35, ro.board.first_api_level=202404).
+# Declaring vendor API level 36 makes Soong build BP4A vendor-side libraries
+# against a newer ABI than the stock ODM camera and fingerprint blobs use.
+BOARD_SHIPPING_API_LEVEL := 202404
+PRODUCT_SHIPPING_API_LEVEL := 35
 
 # AAPT
 PRODUCT_AAPT_CONFIG := normal
@@ -128,7 +132,16 @@ PRODUCT_PACKAGES += \
 # Fingerprint
 PRODUCT_PACKAGES += \
     AHBF-V3-service.xml \
+    android.hardware.biometrics.common-V4-ndk \
+    android.hardware.biometrics.common.thread \
+    android.hardware.biometrics.common.util \
+    android.hardware.biometrics.fingerprint-V5-ndk \
     mfp-daemon
+
+# Frozen interfaces used directly by stock ODM camera and fingerprint blobs.
+PRODUCT_PACKAGES += \
+    android.frameworks.sensorservice-V1-ndk \
+    android.hardware.sensors-V2-ndk
 
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.fingerprint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.fingerprint.xml

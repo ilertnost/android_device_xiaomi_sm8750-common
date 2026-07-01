@@ -189,19 +189,6 @@ vendor/etc/permissions/camera_extensions.xml
 vendor/etc/vintf/manifest/vendor.xiaomi.hardware.quickcamera.xml
 vendor/framework/androidx.camera.extensions.impl.jar
 
-# Camera AIDL compatibility libraries from the stock vendor image.
-# Xiaomi's camera stack was built against graphics.common V5.  Keeping this
-# complete set together avoids mixing generated AIDL implementations from the
-# platform with the stock camera HAL's C++ ownership semantics.
-vendor/lib64/android.hardware.camera.common-V1-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.camera.device-V1-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.camera.device-V2-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.camera.metadata-V1-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.camera.metadata-V2-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.camera.provider-V1-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.camera.provider-V2-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.graphics.common-V5-ndk.so;MAKE_COPY_RULE_ONLY
-
 # Camera Firmware
 odm/firmware/CAMERA_ICP_1.b00
 odm/firmware/CAMERA_ICP_1.b01
@@ -590,21 +577,11 @@ odm/etc/vintf/manifest/AHBF-V3-service.xml
 odm/etc/vintf/manifest/fod-aidl.xml
 # fingerprint.goodix_us.so, fingerprint.qcom_us.so, libgf_hal.so, libmmfp.so have device-specific deps, keep in dada
 odm/lib64/libqc_hal.so;DISABLE_DEPS
-# Biometrics AIDL libraries - V5 needed by mfp-daemon
-# Use MAKE_COPY_RULE_ONLY to avoid module generation (avoids AOSP conflicts)
-vendor/lib64/android.hardware.biometrics.common-V4-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.biometrics.common.thread.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.biometrics.common.util.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.biometrics.fingerprint-V5-ndk.so;MAKE_COPY_RULE_ONLY
 vendor/lib64/com.fingerprints.extension3-V1-ndk.so
 vendor/lib64/vendor.xiaomi.hardware.fingerprintextension-V1-ndk.so
 vendor/lib64/vendor.xiaomi.hardware.fx.tunnel-V1-ndk.so
 vendor/lib64/vendor.qti.hardware.fingerprint-V1-ndk.so
 vendor/lib64/vendor.qti.hardware.fingerprint@1.0.so
-# Sensor service for fingerprint/camera
-vendor/lib64/android.frameworks.sensorservice-V1-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.hardware.sensors-V2-ndk.so;MAKE_COPY_RULE_ONLY
-
 # FM
 vendor/lib64/hw/vendor.qti.hardware.fm-impl.so
 vendor/lib64/vendor.qti.hardware.fm@1.0.so
