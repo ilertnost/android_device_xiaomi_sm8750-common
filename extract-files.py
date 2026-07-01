@@ -176,13 +176,12 @@ blob_fixups: blob_fixups_user_type = {
             'libtinyxml2.so',
             'libtinyxml2-v34.so'
         ),
-     (
-       'odm/lib64/libqc_hal.so',
-       'odm/lib64/hw/fingerprint.qcom_us.default.so',
-     ): blob_fixup()
-        .replace_needed(
-            'android.hardware.biometrics.fingerprint-V5-ndk.so',
-            'android.hardware.biometrics.fingerprint-V4-ndk.so'
+    'odm/etc/init/vendor.qti.camera.provider-service_64.rc': blob_fixup()
+        .regex_replace(
+            r'(\n    task_profiles CameraServiceCapacity)',
+            '\n    setenv LD_LIBRARY_PATH /vendor/lib64/camera-stock:/odm/lib64:/vendor/lib64'
+            '\n    setenv LD_PRELOAD /odm/lib64/libcamera_heap_tagging_shim.so'
+            r'\1',
         ),
      (
        'odm/lib64/libmiXmlParser.so',
