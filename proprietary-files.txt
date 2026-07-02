@@ -2065,10 +2065,6 @@ vendor/etc/dolby/dax-default-spatializer.xml;MAKE_COPY_RULE_ONLY
 vendor/etc/dolby/dax-default.xml;MAKE_COPY_RULE_ONLY
 vendor/etc/init/android.hardware.camera.provider-V1-external-service.rc;MAKE_COPY_RULE_ONLY
 vendor/etc/init/dms-service.rc;MAKE_COPY_RULE_ONLY
-vendor/etc/vintf/manifest/android.hardware.camera.provider.external.xml;MAKE_COPY_RULE_ONLY
-vendor/etc/vintf/manifest/android.hardware.drm-service.xml;MAKE_COPY_RULE_ONLY
-vendor/etc/vintf/manifest/dms-service.xml;MAKE_COPY_RULE_ONLY
-vendor/etc/vintf/manifest/manifest_audio_qti_services.xml;MAKE_COPY_RULE_ONLY
 vendor/lib64/lib_bt_bundle.so;MAKE_COPY_RULE_ONLY
 vendor/lib64/libdapparamstorage.so;MAKE_COPY_RULE_ONLY
 vendor/lib64/libdeccfg.so;MAKE_COPY_RULE_ONLY
