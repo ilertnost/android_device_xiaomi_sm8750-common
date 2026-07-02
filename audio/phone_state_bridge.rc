@@ -1,4 +1,4 @@
-service phone_state_bridge /vendor/bin/phone_state_bridge.sh
+service phone_state_bridge /system/bin/sh /vendor/bin/phone_state_bridge.sh
     class late_start
     user root
     group root audio system
@@ -6,4 +6,4 @@ service phone_state_bridge /vendor/bin/phone_state_bridge.sh
     seclabel u:r:shell:s0
 
 on property:sys.boot_completed=1
-    exec_background u:r:shell:s0 root audio system -- /vendor/bin/phone_state_bridge.sh
+    exec_background u:r:shell:s0 root audio system -- /system/bin/sh /vendor/bin/phone_state_bridge.sh
