@@ -75,23 +75,6 @@ blob_fixups: blob_fixups_user_type = {
             'android.media.audio.common.types-V2-ndk.so', 
             'android.media.audio.common.types-V3-ndk.so'
         ),
-    # Audio HALs - no patching needed, they use _prebuilt suffix
-    (
-        'vendor/lib64/soundfx/libbundleaidl.so',
-        'vendor/lib64/soundfx/libdlbvolaidl.so',
-        'vendor/lib64/soundfx/libhwdapaidl.so',
-        'vendor/lib64/soundfx/liblvacfsprocessingaidl.so',
-        'vendor/lib64/soundfx/libmiwndnsprocessingaidl.so',
-        'vendor/lib64/soundfx/libozoaidl.so',
-        'vendor/lib64/soundfx/libspatializeraidl.so',
-        'vendor/lib64/soundfx/libswgamedapaidl.so',
-        'vendor/lib64/soundfx/libswspatializeraidl.so',
-        'vendor/lib64/libswspatializeraidl_ext.so',
-    ): blob_fixup()
-        .replace_needed(
-            'libaudio_aidl_conversion_common_ndk.so', 
-            'libaudio_aidl_conversion_common_ndk_prebuilt.so'
-        ),
      (
        'vendor/lib64/libsxrservice.so'
      ): blob_fixup()
