@@ -12,6 +12,8 @@ hal_server_domain(vendor_mfp-daemon, hal_fingerprint)
 
 # Fingerprint device access
 allow vendor_mfp-daemon vendor_fingerprint_device:chr_file rw_file_perms;
+allow vendor_mfp-daemon vendor_qbt_device:chr_file rw_file_perms;
+allow vendor_mfp-daemon vendor_miev_device:chr_file rw_file_perms;
 allow vendor_mfp-daemon uhid_device:chr_file rw_file_perms;
 allow vendor_mfp-daemon input_device:dir r_dir_perms;
 allow vendor_mfp-daemon input_device:chr_file rw_file_perms;
