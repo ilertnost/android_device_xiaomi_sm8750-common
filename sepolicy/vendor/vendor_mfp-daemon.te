@@ -9,11 +9,18 @@ binder_use(vendor_mfp-daemon)
 binder_call(vendor_mfp-daemon, system_server)
 binder_call(vendor_mfp-daemon, servicemanager)
 hal_server_domain(vendor_mfp-daemon, hal_fingerprint)
+hal_client_domain(vendor_mfp-daemon, vendor_hal_perf)
 
 # Fingerprint device access
 allow vendor_mfp-daemon vendor_fingerprint_device:chr_file rw_file_perms;
 allow vendor_mfp-daemon vendor_qbt_device:chr_file rw_file_perms;
 allow vendor_mfp-daemon vendor_miev_device:chr_file rw_file_perms;
+allow vendor_mfp-daemon vendor_displayfeature_device:chr_file {
+    ioctl
+    open
+    read
+    write
+};
 allow vendor_mfp-daemon uhid_device:chr_file rw_file_perms;
 allow vendor_mfp-daemon input_device:dir r_dir_perms;
 allow vendor_mfp-daemon input_device:chr_file rw_file_perms;
@@ -35,6 +42,8 @@ allow vendor_mfp-daemon vendor_persist_file:dir search;
 
 # Sysfs access
 allow vendor_mfp-daemon sysfs:file { read write open };
+allow vendor_mfp-daemon sysfs_touch_hostprocess:file { open read };
+allow vendor_mfp-daemon sysfs_tp_fodstatus:file { open read };
 allow vendor_mfp-daemon vendor_sysfs_graphics:dir r_dir_perms;
 allow vendor_mfp-daemon vendor_sysfs_graphics:file rw_file_perms;
 
@@ -43,10 +52,12 @@ allow vendor_mfp-daemon vendor_mfp-daemon:unix_stream_socket { create bind liste
 
 # Properties
 get_prop(vendor_mfp-daemon, vendor_panel_info_prop)
+get_prop(vendor_mfp-daemon, vendor_sensors_prop)
 set_prop(vendor_mfp-daemon, vendor_fp_prop)
 
 # Capabilities
 allow vendor_mfp-daemon self:capability { sys_nice };
+allow vendor_mfp-daemon self:capability2 { block_suspend wake_alarm };
 allow vendor_mfp-daemon self:netlink_socket create_socket_perms_no_ioctl;
 
 # Binder calls
