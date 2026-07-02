@@ -101,6 +101,8 @@ genfscon sysfs /devices/platform/soc/soc:mca_business_charger/power_supply/wirel
 genfscon sysfs /devices/platform/soc/soc:mca_business_charger/wakeup u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/soc/soc:mi_t1_chip/wakeup u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/soc/soc:qcom,dsi-display-primary/wakeup u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/soc/soc:xiaomi_wifi_gpio/wakeup u:object_r:sysfs_wakeup:s0
+genfscon sysfs /devices/platform/synaptics_tcm.0/wakeup u:object_r:sysfs_wakeup:s0
 
 # Vibrator/Haptics
 genfscon sysfs /class/qcom-haptics u:object_r:sysfs_vibrator:s0
