@@ -49,6 +49,15 @@ lib_fixups: lib_fixups_user_type = {
 }
 
 blob_fixups: blob_fixups_user_type = {
+    # The framework consumes IVibrator/default. Xiaomi's stock service uses
+    # the undeclared "vibratorfeature" instance even though it implements the
+    # standard IVibrator interface, so align its registration with our VINTF
+    # manifest while preserving the complete proprietary haptics HAL.
+    'odm/bin/hw/vendor.xiaomi.hardware.vibratorfeature.service': blob_fixup()
+        .binary_regex_replace(
+            b'/vibratorfeature',
+            b'/default\x00\x00\x00\x00\x00\x00\x00\x00',
+        ),
     'odm/etc/init/vendor.xiaomi.hw.touchfeature-service.rc': blob_fixup()
         .regex_replace(
             r'(service touch-kmsg-init-sh .*\n    class main\n)',
