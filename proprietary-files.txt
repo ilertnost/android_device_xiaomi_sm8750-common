@@ -1965,7 +1965,6 @@ odm/firmware/T-cs35l43-dsp1-spk-prot.bin
 
 # Stock OS3 display and vibrator configuration
 odm/etc/surfaceflinger/dolby_vision.cfg;MAKE_COPY_RULE_ONLY
-odm/etc/vintf/manifest/vendor.xiaomi.hardware.vibratorfeature.service.xml;MAKE_COPY_RULE_ONLY
 
 # Stock OS3 IMS permissions
 system_ext/etc/permissions/com.qualcomm.qti.imscmservice-V2.0-java.xml;MAKE_COPY_RULE_ONLY
