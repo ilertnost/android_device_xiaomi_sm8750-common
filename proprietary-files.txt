@@ -1625,6 +1625,7 @@ vendor/bin/wfdhdcphalservice
 vendor/bin/wfdvndservice
 vendor/etc/init/android.hardware.drm@1.1-service.wfdhdcp.rc
 vendor/etc/init/wfdvndservice.rc
+vendor/etc/vintf/manifest/android.hardware.drm-service.xml
 vendor/etc/seccomp_policy/wfdhdcphalservice.policy
 vendor/etc/seccomp_policy/wfdvndservice.policy
 vendor/etc/wfdconfig.xml
