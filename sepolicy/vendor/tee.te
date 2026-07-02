@@ -1,0 +1,2 @@
+# Qualcomm fingerprint TAs create calibration and AI-data subdirectories.
+allow tee fingerprint_vendor_data_file:dir create;
