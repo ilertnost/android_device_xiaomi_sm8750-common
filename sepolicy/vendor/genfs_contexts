@@ -104,6 +104,9 @@ genfscon sysfs /devices/platform/soc/soc:qcom,dsi-display-primary/wakeup u:objec
 genfscon sysfs /devices/platform/soc/soc:xiaomi_wifi_gpio/wakeup u:object_r:sysfs_wakeup:s0
 genfscon sysfs /devices/platform/synaptics_tcm.0/wakeup u:object_r:sysfs_wakeup:s0
 
+# UFS write-booster statistics queried by the camera HAL
+genfscon sysfs /devices/platform/soc/1d84000.ufshc/attributes/wb_avail_buf u:object_r:vendor_sysfs_ufs:s0
+
 # Vibrator/Haptics
 genfscon sysfs /class/qcom-haptics u:object_r:sysfs_vibrator:s0
 genfscon sysfs /devices/platform/soc/984000.i2c/i2c-2/2-005a u:object_r:sysfs_vibrator:s0
