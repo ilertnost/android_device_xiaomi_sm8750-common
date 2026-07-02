@@ -1,5 +1,6 @@
 type hal_aidlbgservice_service, hal_service_type, protected_service, service_manager_type;
 type hal_camera_aon_service, hal_service_type, protected_service, service_manager_type;
+type hal_camera_default_tmpfs, file_type;
 type hal_dynamic_camera_service, hal_service_type, protected_service, service_manager_type;
 type hal_misys_service, hal_service_type, protected_service, service_manager_type;
 
@@ -79,3 +80,4 @@ allow hal_camera_default hal_intentaware_service:service_manager add;
 
 # Silence qspmhal denials (neverallow prevents allow)
 dontaudit hal_camera_default vendor_hal_qspmhal_service:service_manager find;
+tmpfs_domain(hal_camera_default)
