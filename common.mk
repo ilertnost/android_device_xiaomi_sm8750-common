@@ -26,8 +26,7 @@ $(call inherit-product, packages/modules/Virtualization/apex/product_packages.mk
 $(call inherit-product, hardware/qcom-caf/common/common.mk)
 
 # SHIPPING API
-BOARD_SHIPPING_API_LEVEL := 202504
-PRODUCT_SHIPPING_API_LEVEL := 36
+PRODUCT_SHIPPING_API_LEVEL := 35
 
 # AAPT
 PRODUCT_AAPT_CONFIG := normal

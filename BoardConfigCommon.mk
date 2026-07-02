@@ -10,7 +10,12 @@ BUILD_BROKEN_DUP_RULES := true
 BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
 BUILD_BROKEN_MISSING_REQUIRED_MODULES := true
 
-# API Level
+# The OS3 base is Android 16, while the device launched with board API
+# 202404. The shipping value must be set during BoardConfig parsing.
+BOARD_SHIPPING_API_LEVEL := 202404
+
+# bp4a exposes the frozen 202504 vendor policy API. New genfs labels are
+# authored against that API while the shipping property remains 202404.
 BOARD_GENFS_LABELS_VERSION := 202504
 
 # A/B
