@@ -26,12 +26,8 @@ $(call inherit-product, packages/modules/Virtualization/apex/product_packages.mk
 $(call inherit-product, hardware/qcom-caf/common/common.mk)
 
 # SHIPPING API
-# The Android 16 OS3 base retains vendor ABI level 35
-# (ro.vendor.build.version.sdk=35, ro.board.first_api_level=202404).
-# Declaring vendor API level 36 makes Soong build BP4A vendor-side libraries
-# against a newer ABI than the stock ODM camera and fingerprint blobs use.
-BOARD_SHIPPING_API_LEVEL := 202404
-PRODUCT_SHIPPING_API_LEVEL := 35
+BOARD_SHIPPING_API_LEVEL := 202504
+PRODUCT_SHIPPING_API_LEVEL := 36
 
 # AAPT
 PRODUCT_AAPT_CONFIG := normal
