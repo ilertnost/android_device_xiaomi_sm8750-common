@@ -189,6 +189,18 @@ vendor/etc/permissions/camera_extensions.xml
 vendor/etc/vintf/manifest/vendor.xiaomi.hardware.quickcamera.xml
 vendor/framework/androidx.camera.extensions.impl.jar
 
+# Camera AIDL compatibility libraries from the stock vendor image.
+# Keep the complete ABI set together because Xiaomi's camera stack uses
+# graphics.common V5 and stock-generated camera AIDL implementations.
+vendor/lib64/android.hardware.camera.common-V1-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.camera.device-V1-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.camera.device-V2-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.camera.metadata-V1-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.camera.metadata-V2-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.camera.provider-V1-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.camera.provider-V2-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.graphics.common-V5-ndk.so;MAKE_COPY_RULE_ONLY
+
 # Camera Firmware
 odm/firmware/CAMERA_ICP_1.b00
 odm/firmware/CAMERA_ICP_1.b01
