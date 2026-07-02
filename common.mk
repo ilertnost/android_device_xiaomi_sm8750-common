@@ -128,16 +128,7 @@ PRODUCT_PACKAGES += \
 # Fingerprint
 PRODUCT_PACKAGES += \
     AHBF-V3-service.xml \
-    android.hardware.biometrics.common-V4-ndk.vendor \
-    android.hardware.biometrics.common.thread.vendor \
-    android.hardware.biometrics.common.util.vendor \
-    android.hardware.biometrics.fingerprint-V5-ndk.vendor \
     mfp-daemon
-
-# Frozen interfaces used directly by stock ODM camera and fingerprint blobs.
-PRODUCT_PACKAGES += \
-    android.frameworks.sensorservice-V1-ndk.vendor \
-    android.hardware.sensors-V2-ndk.vendor
 
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.fingerprint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.fingerprint.xml
