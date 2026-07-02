@@ -589,11 +589,21 @@ odm/etc/vintf/manifest/AHBF-V3-service.xml
 odm/etc/vintf/manifest/fod-aidl.xml
 # fingerprint.goodix_us.so, fingerprint.qcom_us.so, libgf_hal.so, libmmfp.so have device-specific deps, keep in dada
 odm/lib64/libqc_hal.so;DISABLE_DEPS
+# Biometrics AIDL libraries used by the stock mfp daemon and plugins.
+vendor/lib64/android.hardware.biometrics.common-V4-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.biometrics.common.thread.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.biometrics.common.util.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.biometrics.fingerprint-V5-ndk.so;MAKE_COPY_RULE_ONLY
 vendor/lib64/com.fingerprints.extension3-V1-ndk.so
 vendor/lib64/vendor.xiaomi.hardware.fingerprintextension-V1-ndk.so
 vendor/lib64/vendor.xiaomi.hardware.fx.tunnel-V1-ndk.so
 vendor/lib64/vendor.qti.hardware.fingerprint-V1-ndk.so
 vendor/lib64/vendor.qti.hardware.fingerprint@1.0.so
+
+# Sensor interfaces loaded by the fingerprint and camera stacks.
+vendor/lib64/android.frameworks.sensorservice-V1-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.hardware.sensors-V2-ndk.so;MAKE_COPY_RULE_ONLY
+
 # FM
 vendor/lib64/hw/vendor.qti.hardware.fm-impl.so
 vendor/lib64/vendor.qti.hardware.fm@1.0.so
