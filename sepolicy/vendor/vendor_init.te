@@ -1,2 +1,7 @@
 # Haptic properties
 set_prop(vendor_init, vendor_haptic_prop)
+
+# Xiaomi device-node and watchdog setup performed by vendor init scripts.
+allow vendor_init migt_dev:chr_file getattr;
+allow vendor_init vendor_miev_device:chr_file getattr;
+allow vendor_init proc_hung_task:file write;
