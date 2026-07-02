@@ -186,6 +186,11 @@ blob_fixups: blob_fixups_user_type = {
             'libtinyxml2.so',
             'libtinyxml2-v34.so'
         ),
+    'odm/lib64/libqc_hal.so': blob_fixup()
+        .replace_needed(
+            'android.hardware.biometrics.fingerprint-V5-ndk.so',
+            'android.hardware.biometrics.fingerprint-V4-ndk.so'
+        ),
      (
        'odm/lib64/libmiXmlParser.so',
        'vendor/bin/hw/audiohalservice.qti',
