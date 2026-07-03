@@ -24,6 +24,9 @@ allow hal_camera_default hal_dynamic_camera_service:service_manager find;
 allow hal_camera_default migt_dev:chr_file rw_file_perms;
 allow hal_camera_default proc_pressure_mem:file { getattr open read write };
 allow hal_camera_default self:capability { fowner ipc_lock };
+# Xiaomi's encrypted imaging libraries decrypt their code and read-only data
+# in place during first use, then restore the original page protections.
+allow hal_camera_default self:process execmem;
 allow hal_camera_default sys_thermal_flash_state:file { w_file_perms getattr };
 allow hal_camera_default sys_thermal_torch_real_level:file { w_file_perms getattr };
 allow hal_camera_default sysfs_csiphy_umd_paras:file { open read write };
