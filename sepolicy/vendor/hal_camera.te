@@ -35,6 +35,7 @@ allow hal_camera_default sysfs_migt:file { getattr open read write };
 allow hal_camera_default sysfs_poweraware:file { getattr open read };
 allow hal_camera_default vendor_camera_proc:file r_file_perms;
 allow hal_camera_default vendor_camera_sysfs:file r_file_perms;
+allow hal_camera_default vendor_sysfs_kgsl:file r_file_perms;
 allow hal_camera_default vendor_sysfs_kgsl:lnk_file read;
 allow hal_camera_default vendor_sysfs_ufs:file r_file_perms;
 allow hal_camera_default vendor_miev_device:chr_file rw_file_perms;
