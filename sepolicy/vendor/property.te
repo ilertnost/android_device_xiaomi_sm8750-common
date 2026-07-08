@@ -15,6 +15,7 @@ vendor_internal_prop(vendor_dolbyv_prop)
 
 # Fingerprint
 vendor_public_prop(vendor_fp_prop)
+vendor_restricted_prop(vendor_fp_info_prop)
 
 # Mlipay
 vendor_public_prop(vendor_payment_security_prop)

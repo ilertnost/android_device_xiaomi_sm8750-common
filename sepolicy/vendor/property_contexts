@@ -176,6 +176,7 @@ vendor.dtool. u:object_r:vendor_fp_prop:s0
 vendor.fps_hal. u:object_r:vendor_fp_prop:s0
 vendor.panel.display. u:object_r:vendor_fp_prop:s0
 vendor.panel.touch_vendor u:object_r:vendor_fp_prop:s0
+vendor.fp.info u:object_r:vendor_fp_info_prop:s0
 
 # Mlipay
 odm.security.rootpub.load u:object_r:vendor_payment_security_prop:s0
