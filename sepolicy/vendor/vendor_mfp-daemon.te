@@ -10,6 +10,7 @@ binder_call(vendor_mfp-daemon, system_server)
 binder_call(vendor_mfp-daemon, servicemanager)
 hal_server_domain(vendor_mfp-daemon, hal_fingerprint)
 hal_client_domain(vendor_mfp-daemon, vendor_hal_perf)
+allow vendor_mfp-daemon vendor_hal_fingerprint_hwservice_xiaomi:hwservice_manager { add find };
 
 # Fingerprint device access
 allow vendor_mfp-daemon vendor_fingerprint_device:chr_file rw_file_perms;
@@ -43,7 +44,9 @@ allow vendor_mfp-daemon vendor_persist_file:dir search;
 # Sysfs access
 allow vendor_mfp-daemon sysfs:file { read write open };
 allow vendor_mfp-daemon sysfs_touch_hostprocess:file { open read };
+allow vendor_mfp-daemon sysfs_touch_hostprocess:chr_file r_file_perms;
 allow vendor_mfp-daemon sysfs_tp_fodstatus:file { open read };
+allow vendor_mfp-daemon sysfs_tp_fodstatus:chr_file r_file_perms;
 allow vendor_mfp-daemon vendor_sysfs_displayfeature:dir search;
 allow vendor_mfp-daemon vendor_sysfs_displayfeature:file rw_file_perms;
 allow vendor_mfp-daemon vendor_sysfs_graphics:dir r_dir_perms;
@@ -55,7 +58,9 @@ allow vendor_mfp-daemon vendor_mfp-daemon:unix_stream_socket { create bind liste
 # Properties
 get_prop(vendor_mfp-daemon, vendor_panel_info_prop)
 get_prop(vendor_mfp-daemon, vendor_sensors_prop)
+get_prop(vendor_mfp-daemon, vendor_fp_info_prop)
 set_prop(vendor_mfp-daemon, vendor_fp_prop)
+set_prop(vendor_mfp-daemon, vendor_fp_info_prop)
 
 # Capabilities
 allow vendor_mfp-daemon self:capability { sys_nice };
@@ -72,3 +77,11 @@ allow vendor_mfp-daemon system_app:fd use;
 # SPSS access
 allow vendor_mfp-daemon vendor_sysfs_spss:dir search;
 allow vendor_mfp-daemon vendor_sysfs_spss:file { open read };
+allow vendor_mfp-daemon vendor_spss_utils_device:chr_file rw_file_perms;
+allow vendor_mfp-daemon vendor_skp_device:chr_file rw_file_perms;
+allow vendor_mfp-daemon vendor_spcom_device:chr_file rw_file_perms;
+allow vendor_mfp-daemon vendor_sp_keymaster_device:chr_file rw_file_perms;
+
+# Perf HAL reverse access (PERFLOCKSD proc directory)
+allow vendor_hal_perf_default vendor_mfp-daemon:dir { ioctl read getattr lock open watch watch_reads search };
+allow vendor_hal_perf_default vendor_mfp-daemon:file { ioctl read getattr lock map open watch watch_reads };
