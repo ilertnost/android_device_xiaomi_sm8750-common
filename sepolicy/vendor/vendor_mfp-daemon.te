@@ -37,6 +37,10 @@ allow vendor_mfp-daemon vendor_fingerprint_data_file:file create_file_perms;
 allow vendor_mfp-daemon fingerprint_vendor_data_file:dir create_dir_perms;
 allow vendor_mfp-daemon fingerprint_vendor_data_file:file create_file_perms;
 
+# fpdump directory for finger detect preparation
+allow vendor_mfp-daemon vendor_fingerprint_data_file_fpdump:dir create_dir_perms;
+allow vendor_mfp-daemon vendor_fingerprint_data_file_fpdump:file create_file_perms;
+
 # Persist partition
 allow vendor_mfp-daemon mnt_vendor_file:dir search;
 allow vendor_mfp-daemon vendor_persist_file:dir search;
