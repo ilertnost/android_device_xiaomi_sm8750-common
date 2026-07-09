@@ -49,14 +49,6 @@ lib_fixups: lib_fixups_user_type = {
 }
 
 blob_fixups: blob_fixups_user_type = {
-    # QFP uses CLOCK_BOOTTIME_ALARM timerfds and wakelocks while an enrollment
-    # or authentication operation is active. Keep the stock SYS_NICE grant and
-    # provide the two capabilities required by those kernel interfaces.
-    'odm/etc/init/init.mfp-daemon.aidl.rc': blob_fixup()
-        .regex_replace(
-            r'    capabilities SYS_NICE\n',
-            r'    capabilities SYS_NICE WAKE_ALARM BLOCK_SUSPEND\n',
-        ),
     # The framework consumes IVibrator/default. Xiaomi's stock service uses
     # the undeclared "vibratorfeature" instance even though it implements the
     # standard IVibrator interface, so align its registration with our VINTF
