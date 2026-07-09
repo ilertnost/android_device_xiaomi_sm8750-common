@@ -1,2 +1,7 @@
 # Qualcomm fingerprint TAs create calibration and AI-data subdirectories.
 allow tee fingerprint_vendor_data_file:dir create;
+
+# QFP TA (qseecomd) needs read/write access to vendor_fingerprint_data_file for
+# calibration, enrollment and authentication data via DrmLibFs.
+allow tee vendor_fingerprint_data_file:dir rw_dir_perms;
+allow tee vendor_fingerprint_data_file:file create_file_perms;
