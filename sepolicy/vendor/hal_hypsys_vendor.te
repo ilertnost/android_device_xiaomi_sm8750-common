@@ -8,3 +8,6 @@ init_daemon_domain(hal_hypsys_vendor)
 
 allow hal_hypsys_vendor hal_hypsys_vendor_service:service_manager { add find };
 allow hal_hypsys_vendor hal_misys_service:service_manager { add find };
+
+get_prop(hal_hypsys_vendor, boot_status_prop)
+get_prop(hal_hypsys_vendor, vendor_camera_sensor_prop)
