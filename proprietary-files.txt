@@ -189,6 +189,19 @@ vendor/etc/permissions/camera_extensions.xml
 vendor/etc/vintf/manifest/vendor.xiaomi.hardware.quickcamera.xml
 vendor/framework/androidx.camera.extensions.impl.jar
 
+# MiSys is the broker MiuiCamera uses to pass watermark resources into MIVI.
+# Keep its common and core AIDL endpoints with the vendor implementation.
+vendor/bin/hypsys_vendor
+vendor/bin/hw/vendor.xiaomi.hardware.misys.core-service
+vendor/etc/init/hypsys_vendor.rc
+vendor/etc/init/vendor.xiaomi.hardware.misys.core-service.rc
+vendor/etc/vintf/manifest/manifest_blackbox.xml
+vendor/etc/vintf/manifest/vendor.xiaomi.hardware.misys.common.xml
+vendor/etc/vintf/manifest/vendor.xiaomi.hardware.misys.core.xml
+vendor/lib64/vendor.xiaomi.hardware.blackbox-V1-ndk.so
+vendor/lib64/vendor.xiaomi.hardware.misys.common-V3-ndk.so
+vendor/lib64/vendor.xiaomi.hardware.misys.core-V1-ndk.so
+
 # Camera AIDL compatibility libraries from the stock vendor image.
 # Keep the complete ABI set together because Xiaomi's camera stack uses
 # graphics.common V5 and stock-generated camera AIDL implementations.
