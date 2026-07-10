@@ -25,8 +25,11 @@ vendor.dolby.dms.IDms/default    u:object_r:hal_aidl_dms_service:s0
 vendor.dolby.dvs.IDvs/default u:object_r:dvs_aidl_service:s0
 
 # Fingerprint
+com.fingerprints.extension3.IFingerprintNavigation/default              u:object_r:vendor_hal_fingerprint_service_xiaomi:s0
+com.fingerprints.extension3.IFingerprintSensorTest/default              u:object_r:vendor_hal_fingerprint_service_xiaomi:s0
 vendor.xiaomi.hardware.fx.tunnel.IMiFxTunnel/default                    u:object_r:vendor_hal_fingerprint_service_xiaomi:s0
 vendor.xiaomi.hardware.fingerprintextension.IXiaomiFingerprint/default u:object_r:vendor_hal_fingerprint_service_xiaomi:s0
+vendor.qti.hardware.fingerprint.IQfpExtendedFingerprint/default         u:object_r:vendor_hal_fingerprint_service_xiaomi:s0
 
 # HypSys
 xiaomi.system.hypsys.common.IHypSysSsi/default            u:object_r:hal_hypsys_vendor_service:s0

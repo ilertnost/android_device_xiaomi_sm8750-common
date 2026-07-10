@@ -1,6 +1,7 @@
 type vendor_hal_fingerprint_service_xiaomi, hal_service_type, protected_service, service_manager_type;
 type vendor_hal_fingerprint_hwservice_xiaomi, hal_service_type, hwservice_manager_type;
 
+hal_attribute_service(hal_fingerprint, vendor_hal_fingerprint_service_xiaomi)
 add_service(vendor_mfp-daemon, vendor_hal_fingerprint_service_xiaomi)
 hal_client_domain(hal_fingerprint_default, vendor_hal_perf)
 
