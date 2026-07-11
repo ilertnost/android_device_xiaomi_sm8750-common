@@ -60,6 +60,13 @@ class SM8750UdfpsHandler : public UdfpsHandler {
         }
     }
 
+    bool shouldForwardAcquired(int32_t result, int32_t vendorCode) {
+        // QFP reports 28 while an enrollment sample is being captured.  The
+        // framework uses this notification to keep the optical illumination
+        // active until QBT has finished reading the sample.
+        return static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR && vendorCode == 28;
+    }
+
     void cancel() {
         LOG(INFO) << __func__;
     }
