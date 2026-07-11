@@ -11,3 +11,7 @@ allow hal_hypsys_vendor hal_misys_service:service_manager { add find };
 
 get_prop(hal_hypsys_vendor, boot_status_prop)
 get_prop(hal_hypsys_vendor, vendor_camera_sensor_prop)
+
+# MiSys copies camera watermark assets into the vendor camera data store.
+allow hal_hypsys_vendor vendor_camera_data_file:dir create_dir_perms;
+allow hal_hypsys_vendor vendor_camera_data_file:file create_file_perms;
