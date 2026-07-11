@@ -1,7 +1,9 @@
+# The source-built AIDL service runs in hal_fingerprint_default. The qcom_us
+# and goodix_us modules are in-process backends, so their direct hardware and
+# persist accesses belong to this domain as well.
 type vendor_hal_fingerprint_service_xiaomi, hal_service_type, protected_service, service_manager_type;
-type vendor_hal_fingerprint_hwservice_xiaomi, hal_service_type, hwservice_manager_type;
 
-add_service(vendor_mfp-daemon, vendor_hal_fingerprint_service_xiaomi)
+add_service(hal_fingerprint_default, vendor_hal_fingerprint_service_xiaomi)
 hal_client_domain(hal_fingerprint_default, vendor_hal_perf)
 
 get_prop(hal_fingerprint_default, vendor_panel_info_prop)

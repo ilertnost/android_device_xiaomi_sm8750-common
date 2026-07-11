@@ -596,9 +596,7 @@ vendor/etc/vintf/manifest/vendor.qti.hardware.dsp-service.xml
 vendor/lib64/vendor.qti.hardware.dsp-V1-ndk.so
 
 # Fingerprint
-odm/bin/hw/mfp-daemon;DISABLE_DEPS
-odm/etc/init/init.mfp-daemon.aidl.rc
-odm/etc/vintf/manifest/AHBF-V3-service.xml
+# qcom_us registers these extension services from the source-built AIDL HAL.
 odm/etc/vintf/manifest/fod-aidl.xml
 # fingerprint.goodix_us.so, fingerprint.qcom_us.so, libgf_hal.so and libmmfp.so
 # have device-specific dependencies, so they stay in dada. libqc_hal.so is the
