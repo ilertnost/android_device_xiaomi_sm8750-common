@@ -27,5 +27,5 @@
     <bool name="doze_display_state_supported">true</bool>
 
     <!-- Color of the UDFPS pressed view -->
-    <color name="config_udfpsColor">#00FFFFFF</color>
+    <color name="config_udfpsColor">#FFFFFFFF</color>
 </resources>
