@@ -11,6 +11,7 @@ cc_library {
     compile_multilib: "64",
     shared_libs: [
         "libbase",
+        "libbinder_ndk",
     ],
     static_libs: [
         "android.hardware.biometrics.fingerprint-V4-ndk",
