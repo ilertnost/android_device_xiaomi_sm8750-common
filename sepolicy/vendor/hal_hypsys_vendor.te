@@ -5,9 +5,15 @@ type hal_hypsys_vendor_service, hal_service_type, service_manager_type;
 
 binder_use(hal_hypsys_vendor)
 init_daemon_domain(hal_hypsys_vendor)
+hal_client_domain(hal_hypsys_vendor, hal_misyscore)
 
 allow hal_hypsys_vendor hal_hypsys_vendor_service:service_manager { add find };
 allow hal_hypsys_vendor hal_misys_service:service_manager { add find };
+allow hal_hypsys_vendor hal_misyscore_service:service_manager find;
+allow hal_hypsys_vendor hal_hypsys_vendor:binder call;
+
+# Camera passes watermark payloads to HypSys through shared-memory FDs.
+allow hal_hypsys_vendor platform_app:fd use;
 
 get_prop(hal_hypsys_vendor, boot_status_prop)
 get_prop(hal_hypsys_vendor, vendor_camera_sensor_prop)
