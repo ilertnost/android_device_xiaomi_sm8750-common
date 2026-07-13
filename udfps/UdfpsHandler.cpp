@@ -141,6 +141,12 @@ class SM8750UdfpsHandler : public UdfpsHandler {
         }
     }
 
+    bool shouldForwardAcquired(int32_t result, int32_t vendorCode) {
+        // QFP uses vendor acquired 28 to report an unusable ultrasonic sample.
+        // Forward it so enrollment can give feedback instead of appearing inert.
+        return static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR && vendorCode == 28;
+    }
+
     void cancel() {
         LOG(INFO) << __func__;
         setTouchFodEnabled(false);
