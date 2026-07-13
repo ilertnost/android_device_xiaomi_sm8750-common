@@ -29,8 +29,6 @@
 #define TOUCH_ID_PRIMARY 0
 #define TOUCH_MODE_FOD_ENABLE 10
 
-constexpr binder_flags_t kPrivateVendorFlag = static_cast<binder_flags_t>(0x10000000);
-
 using ::aidl::android::hardware::biometrics::fingerprint::AcquiredInfo;
 
 namespace {
@@ -49,8 +47,7 @@ static bool setTouchFodEnabled(bool enabled) {
     if (status == STATUS_OK) status = AParcel_writeInt32(in, TOUCH_MODE_FOD_ENABLE);
     if (status == STATUS_OK) status = AParcel_writeInt32(in, enabled ? 1 : 0);
     if (status == STATUS_OK) {
-        status = AIBinder_transact(service.get(), TOUCH_FEATURE_SET_MODE_TRANSACTION, &in, &out,
-                                   kPrivateVendorFlag);
+        status = AIBinder_transact(service.get(), TOUCH_FEATURE_SET_MODE_TRANSACTION, &in, &out, 0);
     }
 
     AStatus* callStatus = nullptr;
