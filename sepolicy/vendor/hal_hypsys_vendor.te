@@ -14,6 +14,7 @@ allow hal_hypsys_vendor hal_hypsys_vendor:binder call;
 
 # Camera passes watermark payloads to HypSys through shared-memory FDs.
 allow hal_hypsys_vendor platform_app:fd use;
+allow hal_hypsys_vendor appdomain_tmpfs:file { getattr map read };
 
 get_prop(hal_hypsys_vendor, boot_status_prop)
 get_prop(hal_hypsys_vendor, vendor_camera_sensor_prop)
