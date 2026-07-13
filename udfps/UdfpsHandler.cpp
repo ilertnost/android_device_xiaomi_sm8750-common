@@ -18,11 +18,8 @@
 
 #include "UdfpsHandler.h"
 
-#define COMMAND_FOD_PRESS_STATUS 1
 #define COMMAND_FOD_PRESS_X 2
 #define COMMAND_FOD_PRESS_Y 3
-#define PARAM_FOD_PRESSED 1
-#define PARAM_FOD_RELEASED 0
 
 #define TOUCH_FEATURE_SERVICE "vendor.xiaomi.hw.touchfeature.ITouchFeature/default"
 #define TOUCH_FEATURE_DESCRIPTOR "vendor.xiaomi.hw.touchfeature.ITouchFeature"
@@ -118,14 +115,15 @@ class SM8750UdfpsHandler : public UdfpsHandler {
         setTouchFodEnabled(true);
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_X, x);
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_Y, y);
-        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_PRESSED);
+        // QFP waits for the physical ultrasonic IRQ itself. Injecting the
+        // framework's touchscreen contact as a sensor-down event starts capture
+        // before intr2 fires and consistently yields a zero-IQ sample.
     }
 
     void onFingerUp() {
         LOG(DEBUG) << __func__;
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_X, 0);
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_Y, 0);
-        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_RELEASED);
     }
 
     void onUiReady() {
