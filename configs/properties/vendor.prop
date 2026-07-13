@@ -217,7 +217,6 @@ persist.vendor.qcomsysd.enabled=1
 
 # QCOM Fingerprint
 persist.vendor.qfp=true
-persist.vendor.qfp.wup_display=1
 
 # Radio
 keyguard.no_require_sim=true
