@@ -14,9 +14,7 @@
 #include <android/binder_parcel.h>
 #include <android/binder_status.h>
 
-#include <chrono>
 #include <fstream>
-#include <thread>
 
 #include "UdfpsHandler.h"
 
@@ -31,7 +29,6 @@
 #define TOUCH_FEATURE_SET_MODE_TRANSACTION 9
 #define TOUCH_ID_PRIMARY 0
 #define TOUCH_MODE_FOD_ENABLE 10
-#define FINGER_PRESSURE_PATH "/sys/bus/platform/devices/soc:xiaomi_fingerprint/intr2"
 
 using ::aidl::android::hardware::biometrics::fingerprint::AcquiredInfo;
 
@@ -106,18 +103,6 @@ static void set(const std::string& path, const T& value) {
     file << value;
 }
 
-static bool waitForFingerPressure() {
-    for (int attempt = 0; attempt < 150; ++attempt) {
-        std::ifstream pressure(FINGER_PRESSURE_PATH);
-        int pressed = 0;
-        pressure >> pressed;
-        if (pressed == 1) return true;
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    }
-
-    return false;
-}
-
 }  // anonymous namespace
 
 class SM8750UdfpsHandler : public UdfpsHandler {
@@ -133,13 +118,6 @@ class SM8750UdfpsHandler : public UdfpsHandler {
         setTouchFodEnabled(true);
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_X, x);
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_Y, y);
-        // The framework pointer event is emitted by the touchscreen before the
-        // ultrasonic sensor detects sufficient pressure. Starting capture at
-        // that point only produces QFP acquired 28 with a zero IQ score.
-        if (!waitForFingerPressure()) {
-            LOG(WARNING) << "Timed out waiting for ultrasonic finger pressure";
-            return;
-        }
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_PRESSED);
     }
 
