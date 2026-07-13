@@ -90,6 +90,9 @@ class SM8750UdfpsHandler : public UdfpsHandler {
 
     void onFingerDown(uint32_t x, uint32_t y, float /*minor*/, float /*major*/) {
         LOG(DEBUG) << __func__ << "x: " << x << ", y: " << y;
+        // Ultrasonic sensors do not receive the optical onUiReady callback.
+        // Arm the touch controller when the framework reports actual contact.
+        setTouchFodEnabled(true);
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_X, x);
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_Y, y);
         mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_PRESSED);
