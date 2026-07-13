@@ -12,6 +12,7 @@ cc_library {
     shared_libs: [
         "libbase",
         "libbinder_ndk",
+        "//vendor/xiaomi/sm8750-common:vendor.xiaomi.hw.touchfeature-V1-ndk",
     ],
     static_libs: [
         "android.hardware.biometrics.fingerprint-V4-ndk",

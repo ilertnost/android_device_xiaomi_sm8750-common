@@ -9,11 +9,7 @@
 #include <aidl/android/hardware/biometrics/fingerprint/BnFingerprint.h>
 #include <android-base/logging.h>
 #include <android-base/unique_fd.h>
-#include <android/binder_ibinder.h>
 #include <android/binder_manager.h>
-#include <android/binder_parcel.h>
-#include <android/binder_parcel_utils.h>
-#include <android/binder_status.h>
 
 #include <atomic>
 #include <dirent.h>
@@ -27,6 +23,7 @@
 #include <unistd.h>
 
 #include "UdfpsHandler.h"
+#include "TouchFeatureCompat.h"
 
 #define COMMAND_FOD_PRESS_STATUS 1
 #define COMMAND_FOD_PRESS_X 2
@@ -38,9 +35,6 @@
 
 #define TOUCH_FEATURE_SERVICE                                                  \
   "vendor.xiaomi.hw.touchfeature.ITouchFeature/default"
-#define TOUCH_FEATURE_DESCRIPTOR "vendor.xiaomi.hw.touchfeature.ITouchFeature"
-#define TOUCH_FEATURE_SET_MODE_TRANSACTION 9
-#define TOUCH_FEATURE_GET_MODE_STRING_TRANSACTION 10
 #define TOUCH_ID_PRIMARY 0
 #define TOUCH_MODE_FOD_ENABLE 10
 #define TOUCH_MODE_FOD_AUTH 41
@@ -61,66 +55,29 @@ using ::aidl::android::hardware::biometrics::fingerprint::AcquiredInfo;
 
 namespace {
 
-static void *touchFeatureOnCreate(void *args) { return args; }
+using ::aidl::vendor::xiaomi::hw::touchfeature::ITouchFeature;
 
-static void touchFeatureOnDestroy(void *) {}
-
-static binder_status_t touchFeatureOnTransact(AIBinder *, transaction_code_t,
-                                              const AParcel *, AParcel *) {
-  return STATUS_UNKNOWN_TRANSACTION;
-}
-
-static AIBinder_Class *touchFeatureClass() {
-  static AIBinder_Class *clazz =
-      AIBinder_Class_define(TOUCH_FEATURE_DESCRIPTOR, touchFeatureOnCreate,
-                            touchFeatureOnDestroy, touchFeatureOnTransact);
-  return clazz;
+static std::shared_ptr<ITouchFeature> getTouchFeature() {
+  ndk::SpAIBinder binder(AServiceManager_checkService(TOUCH_FEATURE_SERVICE));
+  if (binder.get() == nullptr)
+    return nullptr;
+  return ITouchFeature::fromBinder(binder);
 }
 
 static bool setTouchMode(int32_t mode, int32_t value) {
-  ndk::SpAIBinder service(AServiceManager_checkService(TOUCH_FEATURE_SERVICE));
-  if (service.get() == nullptr) {
+  auto service = getTouchFeature();
+  if (service == nullptr) {
     LOG(ERROR) << "TouchFeature service is unavailable";
     return false;
   }
 
-  // AIBinder_prepareTransaction only writes the AIDL interface token after the
-  // remote binder has been associated with its interface class.
-  if (!AIBinder_associateClass(service.get(), touchFeatureClass())) {
-    LOG(ERROR) << "Failed to associate the TouchFeature AIDL interface";
-    return false;
-  }
-
-  AParcel *in = nullptr;
-  AParcel *out = nullptr;
-  binder_status_t status = AIBinder_prepareTransaction(service.get(), &in);
-  if (status == STATUS_OK)
-    status = AParcel_writeInt32(in, TOUCH_ID_PRIMARY);
-  if (status == STATUS_OK)
-    status = AParcel_writeInt32(in, mode);
-  if (status == STATUS_OK)
-    status = AParcel_writeInt32(in, value);
-  if (status == STATUS_OK) {
-    status = AIBinder_transact(
-        service.get(), TOUCH_FEATURE_SET_MODE_TRANSACTION, &in, &out, 0);
-  }
-
-  AStatus *callStatus = nullptr;
   int32_t result = -1;
-  if (status == STATUS_OK)
-    status = AParcel_readStatusHeader(out, &callStatus);
-  if (status == STATUS_OK && callStatus != nullptr &&
-      AStatus_isOk(callStatus)) {
-    status = AParcel_readInt32(out, &result);
-  }
-
-  AStatus_delete(callStatus);
-  AParcel_delete(out);
-  AParcel_delete(in);
-
-  if (status != STATUS_OK || result != 0) {
+  auto status =
+      service->setModeValue(TOUCH_ID_PRIMARY, mode, value, &result);
+  if (!status.isOk() || result != 0) {
     LOG(ERROR) << "Failed to set touch mode " << mode << " to " << value
-               << ": status=" << status << " result=" << result;
+               << ": status=" << status.getDescription()
+               << " result=" << result;
     return false;
   }
 
@@ -129,41 +86,17 @@ static bool setTouchMode(int32_t mode, int32_t value) {
 }
 
 static int32_t getTouchFilmMode() {
-  ndk::SpAIBinder service(
-      AServiceManager_checkService(TOUCH_FEATURE_SERVICE));
-  if (service.get() == nullptr ||
-      !AIBinder_associateClass(service.get(), touchFeatureClass())) {
+  auto service = getTouchFeature();
+  if (service == nullptr) {
     return FILM_MODE_OFF;
   }
 
-  AParcel *in = nullptr;
-  AParcel *out = nullptr;
-  binder_status_t status = AIBinder_prepareTransaction(service.get(), &in);
-  if (status == STATUS_OK)
-    status = AParcel_writeInt32(in, TOUCH_ID_PRIMARY);
-  if (status == STATUS_OK)
-    status = AParcel_writeInt32(in, TOUCH_MODE_FILM);
-  if (status == STATUS_OK) {
-    status = AIBinder_transact(service.get(),
-                               TOUCH_FEATURE_GET_MODE_STRING_TRANSACTION, &in,
-                               &out, 0);
-  }
-
-  AStatus *callStatus = nullptr;
   std::string value;
-  if (status == STATUS_OK)
-    status = AParcel_readStatusHeader(out, &callStatus);
-  if (status == STATUS_OK && callStatus != nullptr &&
-      AStatus_isOk(callStatus)) {
-    status = AParcel_readString(out, &value, ndk::AParcel_stdStringAllocator);
-  }
-
-  AStatus_delete(callStatus);
-  AParcel_delete(out);
-  AParcel_delete(in);
-
-  if (status != STATUS_OK) {
-    LOG(WARNING) << "Failed to read touch film mode: status=" << status;
+  auto status = service->getModeCurValueString(TOUCH_ID_PRIMARY,
+                                                TOUCH_MODE_FILM, &value);
+  if (!status.isOk()) {
+    LOG(WARNING) << "Failed to read touch film mode: "
+                 << status.getDescription();
     return FILM_MODE_OFF;
   }
   if (value == "1")
