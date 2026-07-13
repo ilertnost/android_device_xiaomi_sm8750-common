@@ -25,6 +25,7 @@
 #define PARAM_FOD_RELEASED 0
 
 #define TOUCH_FEATURE_SERVICE "vendor.xiaomi.hw.touchfeature.ITouchFeature/default"
+#define TOUCH_FEATURE_DESCRIPTOR "vendor.xiaomi.hw.touchfeature.ITouchFeature"
 #define TOUCH_FEATURE_SET_MODE_TRANSACTION 9
 #define TOUCH_ID_PRIMARY 0
 #define TOUCH_MODE_FOD_ENABLE 10
@@ -33,10 +34,35 @@ using ::aidl::android::hardware::biometrics::fingerprint::AcquiredInfo;
 
 namespace {
 
+static void* touchFeatureOnCreate(void* args) {
+    return args;
+}
+
+static void touchFeatureOnDestroy(void*) {}
+
+static binder_status_t touchFeatureOnTransact(AIBinder*, transaction_code_t, const AParcel*,
+                                               AParcel*) {
+    return STATUS_UNKNOWN_TRANSACTION;
+}
+
+static AIBinder_Class* touchFeatureClass() {
+    static AIBinder_Class* clazz =
+            AIBinder_Class_define(TOUCH_FEATURE_DESCRIPTOR, touchFeatureOnCreate,
+                                  touchFeatureOnDestroy, touchFeatureOnTransact);
+    return clazz;
+}
+
 static bool setTouchFodEnabled(bool enabled) {
     ndk::SpAIBinder service(AServiceManager_checkService(TOUCH_FEATURE_SERVICE));
     if (service.get() == nullptr) {
         LOG(ERROR) << "TouchFeature service is unavailable";
+        return false;
+    }
+
+    // AIBinder_prepareTransaction only writes the AIDL interface token after the
+    // remote binder has been associated with its interface class.
+    if (!AIBinder_associateClass(service.get(), touchFeatureClass())) {
+        LOG(ERROR) << "Failed to associate the TouchFeature AIDL interface";
         return false;
     }
 
