@@ -1,0 +1,22 @@
+From e1b563cee1f80dcca46e36fe35bd0e8f8de07657 Mon Sep 17 00:00:00 2001
+From: turbo-boo <59400127+turbo-boo@users.noreply.github.com>
+Date: Tue, 30 Jun 2026 09:29:05 +0900
+Subject: [PATCH] soundtrigger: Disable duplicate prebuilt HAL module
+
+Change-Id: Ie9f07242acca9b45b662a05d0e745c0a3a0452f3
+---
+ Android.bp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Android.bp b/Android.bp
+index d6627c4..04b5150 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -3,6 +3,7 @@ soong_namespace {
+ 
+ cc_library_shared {
+     name: "libsoundtriggerhal.qti",
++    enabled: false,
+     relative_install_path: "hw",
+     vendor: true,
+ 
