@@ -5,6 +5,7 @@ type hal_dynamic_camera_service, hal_service_type, protected_service, service_ma
 type hal_misys_service, hal_service_type, protected_service, service_manager_type;
 
 get_prop(hal_camera_default, bpf_progs_loaded_prop)
+get_prop(hal_camera_default, media_config_prop)
 get_prop(hal_camera_default, vendor_soc_id_prop)
 set_prop(hal_camera, vendor_camera_sensor_prop)
 set_prop(hal_camera_default, vendor_camera_p3enable_prop)
