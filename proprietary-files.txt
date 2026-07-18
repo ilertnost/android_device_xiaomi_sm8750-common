@@ -38,20 +38,24 @@ vendor/lib64/libvmmem.so
 
 # Audio
 odm/etc/audio/hrtf5c.bin
+odm/etc/ozosdk.license
 odm/lib64/libaudioroute_ext.so
 odm/lib64/libcrussp.so
 odm/lib64/libagmdevice.so
 odm/lib64/libwindns.so;DISABLE_CHECKELF
 vendor/bin/audioadsprpcd
 vendor/bin/hw/audiohalservice.qti
+vendor/bin/hw/vendor.ozoaudio.notify@1.0-service
 vendor/etc/hrtf5c.bin
 vendor/etc/init/audiohalservice_qti.rc
+vendor/etc/init/ozonotify-1.0-service.rc
 vendor/etc/init/vendor.qti.audio-adsprpc-service.rc
 vendor/etc/models/acd/environment.eai
 vendor/etc/models/acd/event.eai
 vendor/etc/models/acd/music.eai
 vendor/etc/models/acd/speech.eai
 vendor/etc/vintf/manifest/qasr_vintf.xml
+vendor/etc/vintf/manifest/ozonotify-1.0.xml
 vendor/lib64/hw/libaudioeffecthal.qti.so;REQUIRED=audioeffectservice_qti.xml;DISABLE_DEPS
 vendor/lib64/libadm.so
 vendor/lib64/libar-acdb.so
@@ -63,6 +67,7 @@ vendor/lib64/libats.so
 vendor/lib64/libaudio_log_utils.so
 vendor/lib64/libaudiocloudctrl.so
 vendor/lib64/libaudioplatformconverter.qti.so;DISABLE_DEPS
+vendor/lib64/libav_ozoencoder.so
 vendor/lib64/libav_miwnsencoder.so
 vendor/lib64/libbatterylistener.so
 vendor/lib64/libcapiv2svacnnvendor.so
@@ -81,6 +86,10 @@ vendor/lib64/libmisfpsop.so
 vendor/lib64/libmisight.so
 vendor/lib64/libmisops.so
 vendor/lib64/libmisoundsa.so
+vendor/lib64/libozoaudio.so
+vendor/lib64/libozoaudioutils.so
+vendor/lib64/libozocapability.so
+vendor/lib64/libozotensorflowlite_c.so
 vendor/lib64/libpal_net_if.so
 vendor/lib64/libpalclient.so
 vendor/lib64/libpaleventnotifier.so
@@ -126,6 +135,7 @@ vendor/lib64/soundfx/libdynproc.so
 vendor/lib64/soundfx/libeffectproxy.so
 vendor/lib64/soundfx/libldnhncr.so
 vendor/lib64/soundfx/libloudnessenhanceraidl.so;DISABLE_DEPS
+vendor/lib64/soundfx/libozoaidl.so;DISABLE_DEPS
 vendor/lib64/soundfx/libqcompostprocbundle.so;DISABLE_DEPS
 vendor/lib64/soundfx/libqcomvisualizer.so;DISABLE_DEPS
 vendor/lib64/soundfx/libqcomvoiceprocessing.so;DISABLE_DEPS
@@ -1716,9 +1726,10 @@ vendor/lib64/hw/libsoundtriggerhal.qti.so;DISABLE_DEPS
 vendor/lib64/vendor.qti.hardware.pal-V1-ndk.so
 vendor/lib64/vendor.qti.hardware.agm-V1-ndk.so
 
-# Audio AIDL libraries needed by audio HAL - use MAKE_COPY_RULE_ONLY to avoid AOSP conflicts
+# Audio AIDL libraries needed by the stock audio stack
+vendor/lib64/com.android.ozoaudio.notify-V1-ndk.so
 vendor/lib64/android.media.audio.common.types-V3-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.media.audio.common.types-V6-ndk.so;MAKE_COPY_RULE_ONLY
+vendor/lib64/android.media.audio.common.types-V6-ndk.so
 vendor/lib64/android.hardware.audio.core-V2-ndk.so;MAKE_COPY_RULE_ONLY
 vendor/lib64/android.hardware.audio.core.sounddose-V2-ndk.so;MAKE_COPY_RULE_ONLY
 vendor/lib64/android.hardware.audio.effect-V2-ndk.so;MAKE_COPY_RULE_ONLY
