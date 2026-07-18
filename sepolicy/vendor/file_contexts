@@ -185,3 +185,6 @@
 /vendor/bin/hw/vendor\.hardware\.vibratorfeature-ext-shim                        u:object_r:hal_vibrator_default_exec:s0
 /dev/qcom_haptic                                                                 u:object_r:qcom_haptic_device:s0
 /mnt/vendor/persist/haptics(/.*)?                                                u:object_r:persist_haptics_file:s0
+
+# OZO audio notify
+/vendor/bin/hw/vendor\.ozoaudio\.notify@1\.0-service                            u:object_r:hal_ozonotify_default_exec:s0

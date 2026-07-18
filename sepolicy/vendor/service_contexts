@@ -40,6 +40,9 @@ vendor.xiaomi.hardware.mediaeventgatherservice.IMediaGather/default             
 # Mlipay
 vendor.xiaomi.hardware.mlipay.IMlipayService/default        u:object_r:hal_mlipay_service:s0
 
+# OZO audio notify
+com.android.ozoaudio.notify.IOzoNotify/default              u:object_r:hal_ozonotify_service:s0
+
 # SLA
 vendor.qti.sla.service.ISlaAIDLService/default u:object_r:hal_slaaidlservice_service:s0
 
