@@ -49,6 +49,14 @@ lib_fixups: lib_fixups_user_type = {
 }
 
 blob_fixups: blob_fixups_user_type = {
+    # AOSP does not ship Xiaomi's ODM audio module configuration. Carry its
+    # four-microphone input layout into the extracted vendor configuration so
+    # OZO spatial recording can open a genuine four-channel capture stream.
+    'vendor/etc/audio/audio_module_config_primary.xml': blob_fixup()
+        .regex_replace(
+            r'(mixPort name="primary_in"[^>]*>\s*<profile[^>]*channelLayouts=")LAYOUT_MONO LAYOUT_STEREO LAYOUT_FRONT_BACK("[^>]*/>)',
+            r'\1LAYOUT_MONO LAYOUT_STEREO LAYOUT_FRONT_BACK LAYOUT_2POINT0POINT2\2',
+        ),
     # The framework consumes IVibrator/default. Xiaomi's stock service uses
     # the undeclared "vibratorfeature" instance even though it implements the
     # standard IVibrator interface, so align its registration with our VINTF
