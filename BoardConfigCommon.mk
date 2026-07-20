@@ -14,9 +14,9 @@ BUILD_BROKEN_MISSING_REQUIRED_MODULES := true
 # 202404. The shipping value must be set during BoardConfig parsing.
 BOARD_SHIPPING_API_LEVEL := 202404
 
-# bp4a exposes the 202604 vendor policy API. New genfs labels are authored
-# against that API while the shipping property remains 202404.
-BOARD_GENFS_LABELS_VERSION := 202604
+# bp4a exposes the frozen 202504 vendor policy API. New genfs labels are
+# authored against that API while the shipping property remains 202404.
+BOARD_GENFS_LABELS_VERSION := 202504
 
 # A/B
 AB_OTA_UPDATER := true
