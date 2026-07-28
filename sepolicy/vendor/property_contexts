@@ -1,5 +1,8 @@
 # Audio
 persist.vendor.audio.cloud u:object_r:vendor_audio_cloud_ctrl_mi_prop:s0
+persist.vendor.audio.current_samplerate u:object_r:vendor_audio_runtime_prop:s0 exact
+vendor.audio.chk.cal.spk u:object_r:vendor_audio_runtime_prop:s0 exact
+vendor.audio.chk.cal.us u:object_r:vendor_audio_runtime_prop:s0 exact
 
 # Camera
 persist.vendor.EnableP3ColorSpace u:object_r:vendor_camera_p3enable_prop:s0
