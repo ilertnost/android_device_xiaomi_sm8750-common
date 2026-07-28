@@ -1554,6 +1554,9 @@ vendor/lib64/libthermalclient.so
 # Thermal engine
 vendor/bin/mi_thermald
 vendor/bin/thermal-engine-v2
+vendor/etc/thermal-engine.conf
+vendor/etc/thermal-map.conf
+vendor/etc/thermald-devices.conf
 vendor/etc/init/hw/init.mi_thermald.rc
 vendor/etc/init/init_thermal-engine-v2.rc
 
