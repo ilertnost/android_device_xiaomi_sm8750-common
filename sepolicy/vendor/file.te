@@ -74,4 +74,6 @@ type vendor_mac_vendor_data_file, data_file_type, file_type, mlstrustedobject;
 type vendor_qrtr_data_file, data_file_type, file_type;
 
 # Block devices
+type blackbox_block_device, dev_type;
+type minidump_block_device, dev_type;
 type vendor_rescue_block_device, dev_type;
