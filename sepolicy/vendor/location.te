@@ -3,3 +3,7 @@
 # SELinux rejects them with execute_no_trans.
 domain_auto_trans(vendor_location, vendor_location_lowi_server_exec, vendor_location_lowi_server)
 domain_auto_trans(vendor_location, vendor_location_xtra_daemon_exec, vendor_location_xtra_daemon)
+
+# loc_launcher passes its inherited descriptors to both helpers.
+allow vendor_location_lowi_server vendor_location:fd use;
+allow vendor_location_xtra_daemon vendor_location:fd use;
