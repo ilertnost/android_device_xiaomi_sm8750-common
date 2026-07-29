@@ -1,0 +1,2 @@
+# MediaProvider uses QSPM while scanning and preparing media.
+hal_client_domain(mediaprovider, vendor_hal_qspmhal)

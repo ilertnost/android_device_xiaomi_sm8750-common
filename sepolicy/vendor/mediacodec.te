@@ -1,0 +1,2 @@
+# Dolby's C2 service reads the graphics configuration used by the encoder.
+get_prop(mediacodec, graphics_config_writable_prop)
