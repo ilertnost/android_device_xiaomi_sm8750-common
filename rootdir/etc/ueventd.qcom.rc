@@ -61,6 +61,7 @@
 # Lineage Health charging control
 /sys/class/qcom-battery/cc_toggle                                    0660   system   system
 /sys/devices/platform/soc/soc:smart_charge/smart_batt                0660   root     root
+/sys/devices/platform/soc/soc:mca_business_charger/debug_ctrl        0660   root     root
 
 
 #Import rc file
