@@ -1,0 +1,4 @@
+# Sensor calibration and registry data are required on production builds too.
+# The Qualcomm base policy gates these permissions behind userdebug_or_eng.
+allow vendor_init-qcom-sensors-sh vendor_sensors_vendor_data_file:dir create_dir_perms;
+allow vendor_init-qcom-sensors-sh vendor_sensors_vendor_data_file:file create_file_perms;
