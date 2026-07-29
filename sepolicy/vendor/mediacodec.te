@@ -1,2 +1,5 @@
 # Dolby's C2 service reads the graphics configuration used by the encoder.
 get_prop(mediacodec, graphics_config_writable_prop)
+
+# Stock C2 queries the display STC service while configuring video pipelines.
+allow mediacodec vendor_mistcdisplay_service:service_manager find;
