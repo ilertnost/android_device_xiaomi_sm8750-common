@@ -19,6 +19,20 @@ allow hal_hypsys_vendor appdomain_tmpfs:file { getattr map read };
 get_prop(hal_hypsys_vendor, boot_status_prop)
 get_prop(hal_hypsys_vendor, vendor_camera_sensor_prop)
 
+# MiSys common service also owns the stock crash, charger-log and hardware
+# information collectors. Keep access limited to their labelled endpoints.
+allow hal_hypsys_vendor block_device:dir r_dir_perms;
+allow hal_hypsys_vendor kmsg_device:chr_file rw_file_perms;
+allow hal_hypsys_vendor kernel:system syslog_read;
+allow hal_hypsys_vendor minidump_data_file:dir create_dir_perms;
+allow hal_hypsys_vendor minidump_data_file:file create_file_perms;
+allow hal_hypsys_vendor sysfs_bootinfo:dir r_dir_perms;
+allow hal_hypsys_vendor sysfs_bootinfo:file rw_file_perms;
+allow hal_hypsys_vendor sysfs_wake_lock:file rw_file_perms;
+allow hal_hypsys_vendor vendor_bsp_data_log_file:dir create_dir_perms;
+allow hal_hypsys_vendor vendor_bsp_data_log_file:file create_file_perms;
+allow hal_hypsys_vendor vendor_sysfs_hardwareinfo:file rw_file_perms;
+
 # MiSys copies camera watermark assets into the vendor camera data store.
 allow hal_hypsys_vendor vendor_camera_data_file:dir create_dir_perms;
 allow hal_hypsys_vendor vendor_camera_data_file:file create_file_perms;

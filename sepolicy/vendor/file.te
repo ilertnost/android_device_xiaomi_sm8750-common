@@ -31,6 +31,7 @@ type vendor_fingerprint_data_file_fpdump, data_file_type, file_type;
 type sysfs_tp_fodstatus, fs_type, sysfs_type;
 
 # Info
+type sysfs_bootinfo, fs_type, sysfs_type;
 type vendor_sysfs_hardwareinfo, fs_type, sysfs_type;
 
 # IR
