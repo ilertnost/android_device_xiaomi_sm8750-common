@@ -29,6 +29,7 @@ allow mi_thermald vendor_data_file:file { create getattr open read rename setatt
 allow mi_thermald vendor_sysfs_battery_supply:dir r_dir_perms;
 allow mi_thermald vendor_sysfs_battery_supply:file rw_file_perms;
 allow mi_thermald vendor_sysfs_battery_supply:lnk_file r_file_perms;
+allow mi_thermald vendor_camera_sysfs:file r_file_perms;
 allow mi_thermald vendor_sysfs_displayfeature:dir search;
 allow mi_thermald vendor_sysfs_displayfeature:file { getattr open read };
 allow mi_thermald vendor_sysfs_graphics:dir r_dir_perms;
