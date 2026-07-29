@@ -1,0 +1,5 @@
+# Match the stock launch path for LOWI and XTRA helpers.  Without these
+# transitions vendor_location attempts to execute both binaries in-place and
+# SELinux rejects them with execute_no_trans.
+domain_auto_trans(vendor_location, vendor_location_lowi_server_exec, vendor_location_lowi_server)
+domain_auto_trans(vendor_location, vendor_location_xtra_daemon_exec, vendor_location_xtra_daemon)
