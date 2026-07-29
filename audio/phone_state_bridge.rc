@@ -4,6 +4,3 @@ service phone_state_bridge /system/bin/sh /vendor/bin/phone_state_bridge.sh
     group root audio system
     oneshot
     seclabel u:r:shell:s0
-
-on property:sys.boot_completed=1
-    exec_background u:r:shell:s0 root audio system -- /system/bin/sh /vendor/bin/phone_state_bridge.sh
