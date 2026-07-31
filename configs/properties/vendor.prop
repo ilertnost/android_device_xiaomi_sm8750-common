@@ -211,6 +211,7 @@ vendor.media.omx=0
 
 # QCOM
 ro.soc.manufacturer=QTI
+ro.vendor.extension_library=libqti-perfd-client.so
 
 # QCOMsysD
 persist.vendor.qcomsysd.enabled=1
