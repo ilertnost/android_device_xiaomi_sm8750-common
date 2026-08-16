@@ -173,10 +173,13 @@ public:
 
   void init(fingerprint_device_t *device) {
     mDevice = device;
-    mUseQcomIntr2 =
-        android::base::GetProperty("persist.vendor.sys.fp.vendor", "") ==
-        "qcom_us";
+    const std::string fingerprintVendor =
+        android::base::GetProperty("persist.vendor.sys.fp.vendor", "");
+    mUseQcomIntr2 = fingerprintVendor == "qcom_us";
+    mUseGoodixTouchAuth = fingerprintVendor == "goodix_us";
     LOG(INFO) << "Using QCOM intr2 handoff: " << mUseQcomIntr2;
+    LOG(INFO) << "Using Goodix touch auth lifecycle: "
+              << mUseGoodixTouchAuth;
 
     std::ifstream factorFile(TOUCH_RESOLUTION_FACTOR_PATH);
     factorFile >> mResolutionFactor;
@@ -318,7 +321,13 @@ private:
       if (mUseQcomIntr2)
         writeState(QCOM_US_INTR2_PATH, true);
       writeState(DISPLAY_PRE_POWER_PATH, true);
-      if (mOperationActive)
+      // Stock mfp-daemon keeps Goodix FOD auth state asserted while a
+      // physical contact is being captured and clears it only when the
+      // operation finishes. Deasserting it here makes the touch controller
+      // withdraw the sample while Goodix is still reading it, which surfaces
+      // as RAW_DATA_CRC_FAILED and SPI_COMMUNICATION errors. Keep the existing
+      // qcom_us handoff unchanged.
+      if (mOperationActive && !mUseGoodixTouchAuth)
         setTouchMode(TOUCH_MODE_FOD_AUTH, 0);
       // Stock posts its QFP down notification asynchronously after changing
       // the touch-panel auth state. Our direct extCmd path is synchronous, so
@@ -410,6 +419,7 @@ private:
   int mStopPipe[2] = {-1, -1};
   int32_t mResolutionFactor = 1;
   bool mUseQcomIntr2 = false;
+  bool mUseGoodixTouchAuth = false;
   std::atomic_bool mStop = false;
   std::atomic_bool mOperationActive = false;
   std::atomic_bool mPhysicalPressed = false;
