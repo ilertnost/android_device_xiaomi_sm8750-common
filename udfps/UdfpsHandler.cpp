@@ -8,6 +8,7 @@
 
 #include <aidl/android/hardware/biometrics/fingerprint/BnFingerprint.h>
 #include <android-base/logging.h>
+#include <android-base/properties.h>
 #include <android-base/unique_fd.h>
 #include <android/binder_manager.h>
 
@@ -172,6 +173,10 @@ public:
 
   void init(fingerprint_device_t *device) {
     mDevice = device;
+    mUseQcomIntr2 =
+        android::base::GetProperty("persist.vendor.sys.fp.vendor", "") ==
+        "qcom_us";
+    LOG(INFO) << "Using QCOM intr2 handoff: " << mUseQcomIntr2;
 
     std::ifstream factorFile(TOUCH_RESOLUTION_FACTOR_PATH);
     factorFile >> mResolutionFactor;
@@ -308,9 +313,10 @@ private:
       return;
 
     if (pressed) {
-      // Stock mfp-daemon arms both qcom_us pressure sensing and display
-      // pre-power before it forwards the physical touch to QFP.
-      writeState(QCOM_US_INTR2_PATH, true);
+      // Stock mfp-daemon drives intr2 only for the qcom_us backend. Driving
+      // that GPIO while goodix_us owns the sensor disrupts its SPI capture.
+      if (mUseQcomIntr2)
+        writeState(QCOM_US_INTR2_PATH, true);
       writeState(DISPLAY_PRE_POWER_PATH, true);
       if (mOperationActive)
         setTouchMode(TOUCH_MODE_FOD_AUTH, 0);
@@ -319,7 +325,8 @@ private:
       // arm the panel before starting capture.
       maybeSendPress();
     } else {
-      writeState(QCOM_US_INTR2_PATH, false);
+      if (mUseQcomIntr2)
+        writeState(QCOM_US_INTR2_PATH, false);
       writeState(DISPLAY_PRE_POWER_PATH, false);
       sendRelease();
       mTouchX = 0;
@@ -402,6 +409,7 @@ private:
   std::thread mMonitorThread;
   int mStopPipe[2] = {-1, -1};
   int32_t mResolutionFactor = 1;
+  bool mUseQcomIntr2 = false;
   std::atomic_bool mStop = false;
   std::atomic_bool mOperationActive = false;
   std::atomic_bool mPhysicalPressed = false;
