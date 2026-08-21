@@ -219,6 +219,15 @@ $(call soong_config_set_bool,lineage_health,charging_control_supports_limit,fals
 
 PRODUCT_PACKAGES += \
     vendor.lineage.health-service.default
+
+# PowerShare
+$(call soong_config_set,lineage_powershare,powershare_path,/sys/class/qcom-battery/reverse_chg_mode)
+$(call soong_config_set,lineage_powershare,powershare_enabled,1)
+$(call soong_config_set,lineage_powershare,powershare_disabled,0)
+
+PRODUCT_PACKAGES += \
+    vendor.lineage.powershare-service.default
+
 # Mountpoint
 $(call soong_config_set,rfs,mpss_firmware_symlink_target,modem_firmware)
 
