@@ -48,7 +48,7 @@ allow hal_hypsys_vendor vendor_sysfs_qcom_battery:dir r_dir_perms;
 allow hal_hypsys_vendor vendor_sysfs_qcom_battery:file r_file_perms;
 allow hal_hypsys_vendor vendor_sysfs_soc_sensitive:file r_file_perms;
 allow hal_hypsys_vendor vendor_sysfs_xm_power:dir r_dir_perms;
-allow hal_hypsys_vendor vendor_sysfs_xm_power:file r_file_perms;
+allow hal_hypsys_vendor vendor_sysfs_xm_power:file rw_file_perms;
 allow hal_hypsys_vendor vfat:dir search;
 
 # MiSys copies camera watermark assets into the vendor camera data store.
