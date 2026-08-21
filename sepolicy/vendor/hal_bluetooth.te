@@ -1,2 +1,10 @@
 allow hal_bluetooth_default vendor_mac_vendor_data_file:dir search;
 allow hal_bluetooth_default vendor_mac_vendor_data_file:file { open read };
+
+# Allow the vendor Bluetooth HAL to persist its BSP diagnostic logs.
+allow hal_bluetooth_default vendor_bsp_data_log_file:dir {
+    add_name create open read search setattr write
+};
+allow hal_bluetooth_default vendor_bsp_data_log_file:file {
+    create open read setattr write
+};
