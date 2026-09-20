@@ -1,0 +1,61 @@
+# Stock Xiaomi face HAL (/odm/bin/hw/mifaced, started by init as odm.miface).
+# It serves the standard AIDL v4 android.hardware.biometrics.face.IFace/default
+# interface and additionally registers the vendor auxiliary services mapped to
+# vendor_hal_miface_service below. It drives the front camera through the
+# camera2 NDK and talks to MI-TEE through the OP-TEE client library and Mink IPC.
+
+type vendor_hal_miface_default, domain;
+type vendor_hal_miface_default_exec, exec_type, vendor_file_type, file_type;
+type vendor_hal_miface_service, hal_service_type, protected_service, service_manager_type;
+
+init_daemon_domain(vendor_hal_miface_default)
+
+# IFace/default is already mapped to hal_face_service by the platform, so being
+# in hal_face_server is enough to register and serve it.
+hal_server_domain(vendor_hal_miface_default, hal_face)
+
+# vendor.xiaomi.hardware.aek.IAEKService/default and
+# vendor.xiaomi.hardware.aon.IAlwaysOn/miaonservicebymiface.
+add_service(vendor_hal_miface_default, vendor_hal_miface_service)
+
+# Camera frames: the HAL is a camera2 NDK client of cameraserver.
+allow vendor_hal_miface_default fwk_camera_service:service_manager find;
+allow vendor_hal_miface_default fwk_camera_hwservice:hwservice_manager find;
+allow vendor_hal_miface_default hidl_token_hwservice:hwservice_manager find;
+binder_call(vendor_hal_miface_default, cameraserver)
+
+# Camera stream buffers are allocated and imported through gralloc.
+hal_client_domain(vendor_hal_miface_default, hal_graphics_allocator)
+
+# MI-TEE: the intra-VM client node (/dev/tee0) is a dedicated type, while
+# /dev/qseecom keeps the Qualcomm QSEE tee_device label (stock granted both).
+allow vendor_hal_miface_default vendor_mitee_client_device:chr_file rw_file_perms;
+allow vendor_hal_miface_default tee_device:chr_file rw_file_perms;
+# Mink shared memory device used for MI-TEE IPC.
+allow vendor_hal_miface_default vendor_membuf_dev:chr_file r_file_perms;
+# Mink IPC over QRTR (libminksocket_vendor MinkIPC_connect_QRTR).
+allow vendor_hal_miface_default self:qipcrtr_socket { read write create getattr setattr lock append map bind connect getopt setopt shutdown };
+# TA buffers are imported through the Qualcomm QSEE dmabuf heaps.
+allow vendor_hal_miface_default vendor_dmabuf_qseecom_heap_device:chr_file r_file_perms;
+allow vendor_hal_miface_default vendor_dmabuf_qseecom_ta_heap_device:chr_file r_file_perms;
+
+# Face data directory (/data/vendor/face).
+allow vendor_hal_miface_default vendor_face_data_file:dir create_dir_perms;
+allow vendor_hal_miface_default vendor_face_data_file:file create_file_perms;
+
+set_prop(vendor_hal_miface_default, vendor_miface_prop)
+get_prop(vendor_hal_miface_default, vendor_miface_prop)
+# ro.hardware.fp.fod / ro.hardware.fp.sideCap, used to coordinate with FOD.
+get_prop(vendor_hal_miface_default, vendor_fp_prop)
+# Camera/radio/display state read while arming the face pipeline.
+get_prop(vendor_hal_miface_default, camera_config_prop)
+get_prop(vendor_hal_miface_default, vendor_display_prop)
+get_prop(vendor_hal_miface_default, vendor_radio_prop)
+
+# Framework sensor service used by the face pipeline.
+allow vendor_hal_miface_default fwk_sensor_hwservice:hwservice_manager find;
+
+# State probed before the AON pipeline is armed: FOD press status and the
+# finger-down node (labelled as display feature sysfs on this platform).
+allow vendor_hal_miface_default sysfs_tp_fodstatus:file r_file_perms;
+allow vendor_hal_miface_default vendor_sysfs_displayfeature:file r_file_perms;
