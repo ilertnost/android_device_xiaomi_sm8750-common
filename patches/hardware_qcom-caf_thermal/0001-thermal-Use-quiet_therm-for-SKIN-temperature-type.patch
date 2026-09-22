@@ -1,0 +1,29 @@
+From 3da9a9d3e0a29edc25ff5d8cfb1c19740b40a8e6 Mon Sep 17 00:00:00 2001
+From: turbo-boo <59400127+turbo-boo@users.noreply.github.com>
+Date: Tue, 22 Sep 2026 13:41:51 +0900
+Subject: [PATCH] thermal: Use quiet_therm for SKIN temperature type
+
+Point the SKIN temperature type at the quiet_therm sensor instead of
+sys-therm-2, which is not present on this platform.
+
+Change-Id: I8f1f96f3625b583f677926648883727409ae60f8
+---
+ thermalConfig.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/thermalConfig.cpp b/thermalConfig.cpp
+index 31e95d2..8b55959 100644
+--- a/thermalConfig.cpp
++++ b/thermalConfig.cpp
+@@ -1954,7 +1954,7 @@ namespace thermal {
+ 		},
+ 		{
+ 			TemperatureType::SKIN,
+-			{ "sys-therm-2" },
++			{ "quiet_therm" },
+ 			"skin",
+ 			{
+ 			[LIGHT] = 48000,
+-- 
+2.43.0
+
