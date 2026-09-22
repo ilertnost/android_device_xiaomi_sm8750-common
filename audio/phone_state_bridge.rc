@@ -1,6 +1,0 @@
-service phone_state_bridge /system/bin/sh /vendor/bin/phone_state_bridge.sh
-    class late_start
-    user root
-    group root audio system
-    oneshot
-    seclabel u:r:shell:s0

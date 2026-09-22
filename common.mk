@@ -110,11 +110,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/xiaomi/sm8750-common/permissions/privapp-permissions-aperture.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-aperture.xml
 
-# Phone state bridge (syncs Java audio mode to native AudioPolicyManager)
-PRODUCT_COPY_FILES += \
-    device/xiaomi/sm8750-common/audio/phone_state_bridge.sh:$(TARGET_COPY_OUT_VENDOR)/bin/phone_state_bridge.sh \
-    device/xiaomi/sm8750-common/audio/phone_state_bridge.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/phone_state_bridge.rc
-
 # DRM
 PRODUCT_PACKAGES += \
     android.hardware.drm-service.clearkey
