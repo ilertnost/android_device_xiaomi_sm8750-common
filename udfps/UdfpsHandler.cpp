@@ -13,6 +13,7 @@
 #include <android/binder_manager.h>
 
 #include <atomic>
+#include <chrono>
 #include <dirent.h>
 #include <fcntl.h>
 #include <fstream>
@@ -51,6 +52,9 @@
 
 #define DISPLAY_STATUS_ON 2
 #define FILM_MODE_OFF 0
+
+#define GOODIX_CRC_VENDOR_CODE 41
+#define GOODIX_MAX_RETRIES 3
 
 using ::aidl::android::hardware::biometrics::fingerprint::AcquiredInfo;
 
@@ -228,6 +232,40 @@ public:
       // an air reference, which must happen only after the finger is gone.
       mContactConsumed = true;
     }
+    if (mUseGoodixTouchAuth &&
+        static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR &&
+        vendorCode == GOODIX_CRC_VENDOR_CODE) {
+      // Observed on goodix_us: each tap ends ~100ms later in
+      // GF_ERROR_SPI_RAW_DATA_CRC_FAILED while the finger is still down, and
+      // Session swallows the vendor code so the UI stays inert. The user
+      // perceives this as "tap repeatedly until it reacts". Emulate the next
+      // tap in software while the contact lasts. Bounded so a persistently
+      // failing sensor cannot spin on one press.
+      if (mOperationActive && mPhysicalPressed && !mContactConsumed &&
+          mCaptureSent && mRetryCount < GOODIX_MAX_RETRIES &&
+          !mRetryPending.exchange(true)) {
+        const int32_t attempt = ++mRetryCount;
+        const uint32_t generation = mPressGeneration.load();
+        LOG(INFO) << "Scheduling Goodix FOD retry, attempt " << attempt;
+        // Session::notify runs on the HAL callback thread; re-entering the
+        // HAL with extCmd here risks deadlock, and the sensor only reports
+        // its reset IRQ ~25ms after the CRC failure. Retry asynchronously
+        // after the reset so the next capture starts from a clean state.
+        // The generation guard drops the retry if the finger was lifted
+        // and put down again while the worker slept.
+        std::thread([this, attempt, generation]() {
+          std::this_thread::sleep_for(std::chrono::milliseconds(50));
+          mRetryPending = false;
+          if (mStop || !mOperationActive || !mPhysicalPressed ||
+              mContactConsumed || !mCaptureSent ||
+              generation != mPressGeneration.load())
+            return;
+          LOG(INFO) << "Retrying Goodix FOD capture, attempt " << attempt;
+          sendRelease();
+          maybeSendPress();
+        }).detach();
+      }
+    }
   }
 
   void onEnrollmentProgress(uint32_t remaining) {
@@ -265,6 +303,7 @@ private:
     mTouchY = 0;
     mCaptureSent = false;
     mContactConsumed = false;
+    mRetryCount = 0;
     mPhysicalPressed = false;
     mOperationActive = true;
     mDevice->extCmd(mDevice, COMMAND_DISPLAY_STATUS, DISPLAY_STATUS_ON);
@@ -316,6 +355,7 @@ private:
       return;
 
     if (pressed) {
+      mPressGeneration++;
       // Stock mfp-daemon drives intr2 only for the qcom_us backend. Driving
       // that GPIO while goodix_us owns the sensor disrupts its SPI capture.
       if (mUseQcomIntr2)
@@ -341,6 +381,8 @@ private:
       mTouchX = 0;
       mTouchY = 0;
       mContactConsumed = false;
+      mRetryCount = 0;
+      mRetryPending = false;
       if (mOperationActive)
         setTouchMode(TOUCH_MODE_FOD_AUTH, 1);
     }
@@ -425,6 +467,9 @@ private:
   std::atomic_bool mPhysicalPressed = false;
   std::atomic_bool mCaptureSent = false;
   std::atomic_bool mContactConsumed = false;
+  std::atomic<int32_t> mRetryCount = 0;
+  std::atomic_bool mRetryPending = false;
+  std::atomic<uint32_t> mPressGeneration = 0;
   std::atomic_bool mInputUnavailable = true;
   std::atomic<int32_t> mTouchX = 0;
   std::atomic<int32_t> mTouchY = 0;
