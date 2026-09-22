@@ -141,6 +141,9 @@ persist.vendor.sensor.mischeck=true
 # Thermal
 persist.vendor.tracking.dfs=true
 
+# Thermal (stock parity)
+persist.vendor.thermal.shutdown.bcl=true
+
 # Partition
 ro.product.property_source_order=odm,vendor,product,system_ext,system
 
