@@ -225,7 +225,9 @@ public:
   void onAcquired(int32_t result, int32_t vendorCode) {
     LOG(DEBUG) << __func__ << " result: " << result
                << " vendorCode: " << vendorCode;
-    if (static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR &&
+    // Goodix reports 201 before CRC code 41; consuming it would block retry.
+    if (!mUseGoodixTouchAuth &&
+        static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR &&
         (vendorCode == 201 || vendorCode == 202)) {
       // QFP has rejected this sample, but the physical contact is still down.
       // Do not synthesize pointer-up here: QFP uses the up transition to take
