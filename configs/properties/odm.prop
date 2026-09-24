@@ -80,6 +80,11 @@ ro.vendor.display.lastnozerobrightness.initvalue=794
 ro.vendor.display.video_or_camera_fps.support=true
 ro.vendor.display.set_fps_stat_timer_ms=250
 ro.vendor.display.dbi.support=qcom
+# Stock parity (odm/etc/build.prop): hardware colour-inversion path, Xiaomi
+# frame-capture manager and the GPP service are advertised by the ODM.
+ro.vendor.display.color_inversion.enable=true
+ro.vendor.display.frame_capture_manager.enable=true
+ro.vendor.display.gppservice.support=true
 vendor.display.boost_cpu_layer_number_threshold=12
 vendor.display.disable_3d_adaptive_tm=1
 vendor.display.disable_stc_dimming=1
@@ -94,6 +99,17 @@ vendor.display.force_tonemapping=1
 vendor.display.multi_display_boost_cpu=1
 vendor.display.support_function_timer=1
 vendor.display.use_layer_ext=0
+# Stock parity (odm/etc/build.prop). libsdmextension.so reads these: the demura
+# recalibration cadence and the primary-panel demura override values, plus the
+# default resolution used by the frame-capture manager.
+vendor.display.default_resolution=1200,2670
+vendor.display.demura_short_timer=5000
+vendor.display.demura_long_timer=600000
+vendor.display.demura_record_timer=1800000
+vendor.display.demura_recalib_timer=3600000
+vendor.display.demura_recalib_timer_divider=1
+vendor.display.demura_primary_panel_override_high=19064576
+vendor.display.demura_primary_panel_override_low=176
 
 # Displayfeature
 ro.vendor.histogram.enable=true
@@ -108,7 +124,10 @@ vendor.wv.oemcrypto.debug.enable_prov40=true
 ro.vendor.qti.va_odm.support=1
 
 # Graphics
-debug.sf.set_idle_timer_ms=500
+# Stock parity (odm/etc/build.prop): SurfaceFlinger enters the idle (low) refresh
+# state 110 ms after the last update instead of 500 ms, so the LTPO panel reaches
+# its autonomous idle rate sooner.
+debug.sf.set_idle_timer_ms=110
 persist.vendor.dc_backlight.enable=false
 persist.vendor.dc_backlight.threshold=0
 
