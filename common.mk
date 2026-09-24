@@ -165,6 +165,16 @@ PRODUCT_PACKAGES += \
     vendor.qti.hardware.display.config-V12-ndk.vendor \
     vendor.qti.hardware.memtrack-service
 
+# QTI display boot configuration (stock parity). The script sets the per-SOC
+# display properties this panel is configured with, including the VRR /
+# HAL self-refresh set (debug.sf.enable_vrr_config,
+# vendor.display.enable_hal_self_refresh, idle content fps hint, optimal
+# refresh rate, refresh rate changeable) that lets the framework use the
+# panel's autonomous 1 Hz idle rates instead of stopping at the fixed modes.
+PRODUCT_PACKAGES += \
+    init.qti.display_boot.sh \
+    init.qti.display_boot.rc
+
 ifneq ($(TARGET_USES_PREBUILT_DISPLAY_ALLOCATOR),true)
 PRODUCT_PACKAGES += \
     vendor.qti.hardware.display.allocator-service
