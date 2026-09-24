@@ -33,9 +33,6 @@ allow vendor_hal_miface_default vendor_mitee_client_device:chr_file rw_file_perm
 allow vendor_hal_miface_default tee_device:chr_file rw_file_perms;
 # Mink shared memory device used for MI-TEE IPC.
 allow vendor_hal_miface_default vendor_membuf_dev:chr_file r_file_perms;
-# /dev/miev: Xiaomi event notification node (miev.ko) used alongside the Mink
-# IPC path; stock granted it to the other MI-TEE clients the same way.
-allow vendor_hal_miface_default vendor_miev_device:chr_file rw_file_perms;
 # Mink IPC over QRTR (libminksocket_vendor MinkIPC_connect_QRTR).
 allow vendor_hal_miface_default self:qipcrtr_socket { read write create getattr setattr lock append map bind connect getopt setopt shutdown };
 # TA buffers are imported through the Qualcomm QSEE dmabuf heaps.
