@@ -1,19 +1,3 @@
-# MI-TEE: the supplicant owns the intra-VM client node, the MITEE VM channel,
-# the MITEE storage and its log, and publishes the MITEE VM boot state that
-# gates the face HAL start trigger (stock granted the same set).
-allow tee vendor_mitee_client_device:chr_file rw_file_perms;
-allow tee vendor_gunyah_chr_device:chr_file rw_file_perms;
-allow tee vendor_mitee_data_file:dir create_dir_perms;
-allow tee vendor_mitee_data_file:file create_file_perms;
-allow tee vendor_mitee_sfs_file:dir create_dir_perms;
-allow tee vendor_mitee_sfs_file:file create_file_perms;
-# The MITEE secure-storage tree lives under /mnt/vendor/persist, whose parent
-# directories carry the mnt_vendor_file label.
-allow tee mnt_vendor_file:dir { search getattr };
-allow tee proc_mitee_log:file r_file_perms;
-
-set_prop(tee, vendor_mitee_prop)
-
 # Qualcomm fingerprint TAs create calibration and AI-data subdirectories.
 allow tee fingerprint_vendor_data_file:dir create;
 

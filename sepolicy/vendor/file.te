@@ -25,18 +25,6 @@ type vendor_bsp_data_log_file, data_file_type, file_type;
 # Display
 type vendor_sysfs_displayfeature, fs_type, sysfs_type;
 
-# Face
-type vendor_face_data_file, data_file_type, file_type;
-
-# MI-TEE
-# The MI-TEE client node (/dev/tee0, /dev/teepriv0) is distinct from the
-# Qualcomm QSEE tee_device (/dev/qseecom); stock kept it in its own type and
-# granted it only to the MI-TEE clients.
-type proc_mitee_log, fs_type, proc_type;
-type vendor_mitee_client_device, dev_type;
-type vendor_mitee_data_file, data_file_type, file_type;
-type vendor_mitee_sfs_file, data_file_type, file_type, vendor_persist_type;
-
 # Fingerprint
 type vendor_fingerprint_data_file, data_file_type, file_type;
 type vendor_fingerprint_data_file_fpdump, data_file_type, file_type;

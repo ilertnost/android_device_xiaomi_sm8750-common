@@ -131,11 +131,6 @@ debug.sf.set_idle_timer_ms=110
 persist.vendor.dc_backlight.enable=false
 persist.vendor.dc_backlight.threshold=0
 
-# MI-TEE
-# Stock parity: the ODM advertises MI-TEE support, which the face HAL uses to
-# load its TAs through the stock TEE supplicant.
-ro.vendor.mitee_support=
-
 # NFC
 ro.vendor.se.type=HCE,UICC
 ro.vendor.nfc.repair=1
