@@ -14,6 +14,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <dirent.h>
 #include <fcntl.h>
 #include <fstream>
@@ -55,6 +56,7 @@
 
 #define GOODIX_CRC_VENDOR_CODE 41
 #define GOODIX_MAX_RETRIES 3
+#define GOODIX_RETRY_DELAY_MS 50
 
 using ::aidl::android::hardware::biometrics::fingerprint::AcquiredInfo;
 
@@ -157,6 +159,12 @@ static bool writeState(const char *path, bool enabled) {
   return true;
 }
 
+static int64_t nowMs() {
+  return std::chrono::duration_cast<std::chrono::milliseconds>(
+             std::chrono::steady_clock::now().time_since_epoch())
+      .count();
+}
+
 } // anonymous namespace
 
 class SM8750UdfpsHandler : public UdfpsHandler {
@@ -245,27 +253,17 @@ public:
       // failing sensor cannot spin on one press.
       if (mOperationActive && mPhysicalPressed && !mContactConsumed &&
           mCaptureSent && mRetryCount < GOODIX_MAX_RETRIES &&
-          !mRetryPending.exchange(true)) {
+          mRetryDeadlineMs.load() == 0) {
         const int32_t attempt = ++mRetryCount;
-        const uint32_t generation = mPressGeneration.load();
-        LOG(INFO) << "Scheduling Goodix FOD retry, attempt " << attempt;
         // Session::notify runs on the HAL callback thread; re-entering the
         // HAL with extCmd here risks deadlock, and the sensor only reports
-        // its reset IRQ ~25ms after the CRC failure. Retry asynchronously
-        // after the reset so the next capture starts from a clean state.
-        // The generation guard drops the retry if the finger was lifted
-        // and put down again while the worker slept.
-        std::thread([this, attempt, generation]() {
-          std::this_thread::sleep_for(std::chrono::milliseconds(50));
-          mRetryPending = false;
-          if (mStop || !mOperationActive || !mPhysicalPressed ||
-              mContactConsumed || !mCaptureSent ||
-              generation != mPressGeneration.load())
-            return;
-          LOG(INFO) << "Retrying Goodix FOD capture, attempt " << attempt;
-          sendRelease();
-          maybeSendPress();
-        }).detach();
+        // its reset IRQ ~25ms after the CRC failure. Only arm the retry:
+        // monitorTouch() runs it once the delay expired, so every extCmd
+        // stays on the thread that already drives the other interactions and
+        // the handler destructor's join remains the single owner.
+        mRetryGeneration = mPressGeneration.load();
+        mRetryDeadlineMs = nowMs() + GOODIX_RETRY_DELAY_MS;
+        LOG(INFO) << "Scheduling Goodix FOD retry, attempt " << attempt;
       }
     }
   }
@@ -306,6 +304,7 @@ private:
     mCaptureSent = false;
     mContactConsumed = false;
     mRetryCount = 0;
+    mRetryDeadlineMs = 0;
     mPhysicalPressed = false;
     mOperationActive = true;
     mDevice->extCmd(mDevice, COMMAND_DISPLAY_STATUS, DISPLAY_STATUS_ON);
@@ -384,7 +383,7 @@ private:
       mTouchY = 0;
       mContactConsumed = false;
       mRetryCount = 0;
-      mRetryPending = false;
+      mRetryDeadlineMs = 0;
       if (mOperationActive)
         setTouchMode(TOUCH_MODE_FOD_AUTH, 1);
     }
@@ -407,6 +406,21 @@ private:
         }
       }
     }
+    maybeSendPress();
+  }
+
+  void maybeRunRetry() {
+    const int64_t deadline = mRetryDeadlineMs.load();
+    if (deadline == 0 || nowMs() < deadline)
+      return;
+
+    mRetryDeadlineMs = 0;
+    if (mStop || !mOperationActive || !mPhysicalPressed || mContactConsumed ||
+        !mCaptureSent || mRetryGeneration.load() != mPressGeneration.load())
+      return;
+
+    LOG(INFO) << "Retrying Goodix FOD capture, attempt " << mRetryCount.load();
+    sendRelease();
     maybeSendPress();
   }
 
@@ -433,24 +447,35 @@ private:
     };
 
     while (!mStop) {
-      int count = TEMP_FAILURE_RETRY(poll(fds, 3, -1));
-      if (count <= 0)
-        continue;
-      if (fds[0].revents & POLLIN) {
-        char value;
-        TEMP_FAILURE_RETRY(read(mStopPipe[0], &value, sizeof(value)));
-        break;
+      // Wait for a touch event, but wake up for a pending retry as well.
+      const int64_t retryDeadline = mRetryDeadlineMs.load();
+      int timeout = -1;
+      if (retryDeadline != 0) {
+        const int64_t now = nowMs();
+        timeout = retryDeadline > now ? static_cast<int>(retryDeadline - now)
+                                      : 0;
       }
 
-      if (inputFd >= 0 && (fds[2].revents & POLLIN))
-        handleInputEvents(inputFd);
-      if (fds[1].revents & (POLLERR | POLLPRI)) {
-        char state = '0';
-        if (TEMP_FAILURE_RETRY(pread(statusFd, &state, sizeof(state), 0)) ==
-            1) {
-          handlePressState(state == '1');
+      int count = TEMP_FAILURE_RETRY(poll(fds, 3, timeout));
+      if (count > 0) {
+        if (fds[0].revents & POLLIN) {
+          char value;
+          TEMP_FAILURE_RETRY(read(mStopPipe[0], &value, sizeof(value)));
+          break;
+        }
+
+        if (inputFd >= 0 && (fds[2].revents & POLLIN))
+          handleInputEvents(inputFd);
+        if (fds[1].revents & (POLLERR | POLLPRI)) {
+          char state = '0';
+          if (TEMP_FAILURE_RETRY(pread(statusFd, &state, sizeof(state), 0)) ==
+              1) {
+            handlePressState(state == '1');
+          }
         }
       }
+
+      maybeRunRetry();
     }
 
     if (inputFd >= 0)
@@ -470,7 +495,8 @@ private:
   std::atomic_bool mCaptureSent = false;
   std::atomic_bool mContactConsumed = false;
   std::atomic<int32_t> mRetryCount = 0;
-  std::atomic_bool mRetryPending = false;
+  std::atomic<int64_t> mRetryDeadlineMs = 0;
+  std::atomic<uint32_t> mRetryGeneration = 0;
   std::atomic<uint32_t> mPressGeneration = 0;
   std::atomic_bool mInputUnavailable = true;
   std::atomic<int32_t> mTouchX = 0;
