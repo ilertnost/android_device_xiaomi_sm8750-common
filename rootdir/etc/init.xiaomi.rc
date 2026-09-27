@@ -6,12 +6,12 @@ on boot
     chown system system /dev/xiaomi-touch
     chmod 0660 /dev/xiaomi-touch
 
-    chmod 0666 /dev/xiaomi-fp
+    chmod 0660 /dev/xiaomi-fp
     chown system system /dev/xiaomi-fp
-    chmod 0666 /dev/mifp_id
+    chmod 0660 /dev/mifp_id
     chown system system /dev/mifp_id
     chown system system /sys/bus/platform/devices/soc:xiaomi_fingerprint/intr2
-    chmod 0666 /sys/bus/platform/devices/soc:xiaomi_fingerprint/intr2
+    chmod 0664 /sys/bus/platform/devices/soc:xiaomi_fingerprint/intr2
 
     # Lineage Health charging control - change ownership so HAL can write without dac_override
     chown root root /sys/devices/platform/soc/soc:smart_charge/smart_batt
