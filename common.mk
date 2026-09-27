@@ -475,9 +475,6 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/vendor_ramdisk/system/lib64/libext2_uuid.so:$(TARGET_COPY_OUT_VENDOR_RAMDISK)/system/lib64/libext2_uuid.so
 PRODUCT_CHECK_PREBUILT_MAX_PAGE_SIZE := false
 
-# Symlink for Xiaomi audio HAL compatibility
-PRODUCT_PACKAGES += \
-
 # Audio configs
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/../../../vendor/xiaomi/sm8750-common/proprietary/vendor/etc/audio/sku_sun/audio_effects.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio/sku_sun/audio_effects.conf \
