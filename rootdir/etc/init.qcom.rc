@@ -302,7 +302,8 @@ on post-fs-data
     mkdir /data/vendor/camera/offlinelog 0777 cameraserver audio
     mkdir /data/vendor/camera/aftersalelog 0777 cameraserver audio
     # MIUI ADD: Camera_CameraSkyNet
-    chmod 0666 /dev/camlog
+    chown root system /dev/camlog
+    chmod 0660 /dev/camlog
     #END Camera_CameraSkyNet
 
     # MIUI ADD: Camera_CamSched
@@ -1023,17 +1024,17 @@ on late-init && property:ro.build.type=user && property:ro.debuggable=1
     chmod 0755 /sys/kernel/debug
 
 on property:sys.boot_completed=1 && property:ro.build.type=user && property:ro.debuggable=1
-    chmod 0666 /sys/class/thermal/thermal_zone75/temp
-    chmod 0666 /sys/class/thermal/thermal_zone74/temp
-    chmod 0666 /sys/class/thermal/thermal_zone73/temp
-    chmod 0666 /sys/class/thermal/thermal_zone72/temp
-    chmod 0666 /sys/class/thermal/thermal_zone71/temp
-    chmod 0666 /sys/class/thermal/thermal_zone70/temp
-    chmod 0666 /sys/class/thermal/thermal_zone69/temp
-    chmod 0666 /sys/class/thermal/thermal_zone68/temp
-    chmod 0666 /sys/class/thermal/thermal_zone67/temp
-    chmod 0666 /sys/class/thermal/thermal_zone66/temp
-    chmod 0666 /sys/class/thermal/thermal_zone65/temp
+    chmod 0444 /sys/class/thermal/thermal_zone75/temp
+    chmod 0444 /sys/class/thermal/thermal_zone74/temp
+    chmod 0444 /sys/class/thermal/thermal_zone73/temp
+    chmod 0444 /sys/class/thermal/thermal_zone72/temp
+    chmod 0444 /sys/class/thermal/thermal_zone71/temp
+    chmod 0444 /sys/class/thermal/thermal_zone70/temp
+    chmod 0444 /sys/class/thermal/thermal_zone69/temp
+    chmod 0444 /sys/class/thermal/thermal_zone68/temp
+    chmod 0444 /sys/class/thermal/thermal_zone67/temp
+    chmod 0444 /sys/class/thermal/thermal_zone66/temp
+    chmod 0444 /sys/class/thermal/thermal_zone65/temp
 
 service qrtr-lookup /vendor/bin/qrtr-lookup
     class core

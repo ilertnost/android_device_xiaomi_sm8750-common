@@ -79,7 +79,8 @@ on init
     start logd
 
     # Initial uhid
-    chmod 0666 /dev/uhid
+    # /dev/uhid is created by ueventd as 0660 uhid:uhid (its consumers are in group uhid)
+    chmod 0660 /dev/uhid
 
 on early-fs
     start vold
@@ -112,7 +113,8 @@ on late-fs
     mount_all /vendor/etc/fstab.qcom --late
 
 on post-fs-data
-    chmod 0666 /dev/migt
+    chown root system /dev/migt
+    chmod 0660 /dev/migt
     restorecon /dev/migt
     chmod 0777 /sys/module/migt/parameters/migt_freq
     restorecon /sys/module/migt/parameters/migt_freq
@@ -142,7 +144,8 @@ on post-fs-data
     restorecon /sys/module/migt/parameters/glk_maxfreq
     chmod 0666 /sys/module/migt/parameters/force_reset_runtime
     restorecon /sys/module/migt/parameters/force_reset_runtime
-    chmod 0777 /sys/module/metis/parameters/minor_window_app
+    chown root system /sys/module/metis/parameters/minor_window_app
+    chmod 0664 /sys/module/metis/parameters/minor_window_app
     restorecon /sys/module/metis/parameters/minor_window_app
     chmod 0777 /sys/module/mist/parameters/mist_set_uid
     restorecon /sys/module/mist/parameters/mist_set_uid
@@ -199,7 +202,8 @@ on post-fs-data
     chmod 0666 /sys/module/migt/parameters/fpercent
     restorecon /sys/module/migt/parameters/fpercent
 
-    chmod 0666 /dev/metis
+    chown root system /dev/metis
+    chmod 0660 /dev/metis
     restorecon /dev/metis
     chmod 0664 /sys/module/metis/parameters/add_rebind_task_lit
     chmod 0664 /sys/module/metis/parameters/add_rebind_task_mid
@@ -229,76 +233,107 @@ on post-fs-data
     chown root system /sys/module/metis/parameters/del_bclus_affinity_uidlist
     chown root system /sys/module/metis/parameters/reset_clus_affinity_uidlist
 
-    chmod 0666 /dev/metis
+    chmod 0660 /dev/metis
     restorecon /dev/metis
-    chmod 0666 /sys/module/metis/parameters/mi_viptask
+    chown root system /sys/module/metis/parameters/mi_viptask
+    chmod 0664 /sys/module/metis/parameters/mi_viptask
     restorecon /sys/module/metis/parameters/mi_viptask
-    chmod 0666 /sys/module/metis/parameters/mi_viptask_balance
+    chown root system /sys/module/metis/parameters/mi_viptask_balance
+    chmod 0664 /sys/module/metis/parameters/mi_viptask_balance
     restorecon /sys/module/metis/parameters/mi_viptask_balance
-    chmod 0666 /sys/module/metis/parameters/mi_boost_duration
+    chown root system /sys/module/metis/parameters/mi_boost_duration
+    chmod 0664 /sys/module/metis/parameters/mi_boost_duration
     restorecon /sys/module/metis/parameters/mi_boost_duration
     chmod 0666 /sys/class/thermal/thermal_message/boost
     restorecon /sys/class/thermal/thermal_message/boost
-    chmod 0666 /sys/module/metis/parameters/vip_link_enable
+    chown root system /sys/module/metis/parameters/vip_link_enable
+    chmod 0664 /sys/module/metis/parameters/vip_link_enable
     restorecon /sys/module/metis/parameters/vip_link_enable
-    chmod 0666 /sys/module/metis/parameters/vip_link_async_binder
+    chown root system /sys/module/metis/parameters/vip_link_async_binder
+    chmod 0664 /sys/module/metis/parameters/vip_link_async_binder
     restorecon /sys/module/metis/parameters/vip_link_async_binder
-    chmod 0666 /sys/module/metis/parameters/mi_fboost_enable
+    chown root system /sys/module/metis/parameters/mi_fboost_enable
+    chmod 0664 /sys/module/metis/parameters/mi_fboost_enable
     restorecon /sys/module/metis/parameters/mi_fboost_enable
-    chmod 0666 /sys/module/metis/parameters/add_mi_viptask_enqueue_boost
+    chown root system /sys/module/metis/parameters/add_mi_viptask_enqueue_boost
+    chmod 0664 /sys/module/metis/parameters/add_mi_viptask_enqueue_boost
     restorecon /sys/module/metis/parameters/add_mi_viptask_enqueue_boost
-    chmod 0666 /sys/module/metis/parameters/del_mi_viptask_enqueue_boost
+    chown root system /sys/module/metis/parameters/del_mi_viptask_enqueue_boost
+    chmod 0664 /sys/module/metis/parameters/del_mi_viptask_enqueue_boost
     restorecon /sys/module/metis/parameters/del_mi_viptask_enqueue_boost
-    chmod 0666 /sys/module/metis/parameters/add_mi_viptask_sched_priority
+    chown root system /sys/module/metis/parameters/add_mi_viptask_sched_priority
+    chmod 0664 /sys/module/metis/parameters/add_mi_viptask_sched_priority
     restorecon /sys/module/metis/parameters/add_mi_viptask_sched_priority
-    chmod 0666 /sys/module/metis/parameters/del_mi_viptask_sched_priority
+    chown root system /sys/module/metis/parameters/del_mi_viptask_sched_priority
+    chmod 0664 /sys/module/metis/parameters/del_mi_viptask_sched_priority
     restorecon /sys/module/metis/parameters/del_mi_viptask_sched_priority
-    chmod 0666 /sys/module/metis/parameters/add_mi_viptask_sched_lit_core
+    chown root system /sys/module/metis/parameters/add_mi_viptask_sched_lit_core
+    chmod 0664 /sys/module/metis/parameters/add_mi_viptask_sched_lit_core
     restorecon /sys/module/metis/parameters/add_mi_viptask_sched_lit_core
-    chmod 0666 /sys/module/metis/parameters/del_mi_viptask_sched_lit_core
+    chown root system /sys/module/metis/parameters/del_mi_viptask_sched_lit_core
+    chmod 0664 /sys/module/metis/parameters/del_mi_viptask_sched_lit_core
     restorecon /sys/module/metis/parameters/del_mi_viptask_sched_lit_core
-    chmod 0666 /sys/module/metis/parameters/is_break_enable
+    chown root system /sys/module/metis/parameters/is_break_enable
+    chmod 0664 /sys/module/metis/parameters/is_break_enable
     restorecon /sys/module/metis/parameters/is_break_enable
-    chmod 0666 /sys/module/metis/parameters/trace_motion_event
+    chmod 0664 /sys/module/metis/parameters/trace_motion_event
     restorecon /sys/module/metis/parameters/trace_motion_event
     chown root system /sys/module/metis/parameters/trace_motion_event
-    chmod 0666 /sys/module/metis/parameters/cold_start_app_tgid
+    chown root system /sys/module/metis/parameters/cold_start_app_tgid
+    chmod 0664 /sys/module/metis/parameters/cold_start_app_tgid
     restorecon /sys/module/metis/parameters/cold_start_app_tgid
-    chmod 0666 /sys/module/metis/parameters/metis_wakeup_enable
+    chown root system /sys/module/metis/parameters/metis_wakeup_enable
+    chmod 0664 /sys/module/metis/parameters/metis_wakeup_enable
     restorecon /sys/module/metis/parameters/metis_wakeup_enable
-    chmod 0666 /sys/module/metis/parameters/metis_wakeup_task
+    chown root system /sys/module/metis/parameters/metis_wakeup_task
+    chmod 0664 /sys/module/metis/parameters/metis_wakeup_task
     restorecon /sys/module/metis/parameters/metis_wakeup_task
-    chmod 0666 /sys/module/metis/parameters/protect_cs
+    chown root system /sys/module/metis/parameters/protect_cs
+    chmod 0664 /sys/module/metis/parameters/protect_cs
     restorecon /sys/module/metis/parameters/protect_cs
-    chmod 0666 /sys/module/metis/parameters/metis_schlat_enable
+    chown root system /sys/module/metis/parameters/metis_schlat_enable
+    chmod 0664 /sys/module/metis/parameters/metis_schlat_enable
     restorecon /sys/module/metis/parameters/metis_schlat_enable
-    chmod 0666 /sys/module/metis/parameters/common_persist_vip_task
+    chown root system /sys/module/metis/parameters/common_persist_vip_task
+    chmod 0664 /sys/module/metis/parameters/common_persist_vip_task
     restorecon /sys/module/metis/parameters/common_persist_vip_task
-    chmod 0666 /sys/module/metis/parameters/clear_persist_vip_task
+    chown root system /sys/module/metis/parameters/clear_persist_vip_task
+    chmod 0664 /sys/module/metis/parameters/clear_persist_vip_task
     restorecon /sys/module/metis/parameters/clear_persist_vip_task
 
-    chmod 0666 /dev/metis_link
+    chown root system /dev/metis_link
+    chmod 0660 /dev/metis_link
     restorecon /dev/metis_link
-    chmod 0666 /sys/module/metis/parameters/mi_lock_blocked_pid
+    chown root system /sys/module/metis/parameters/mi_lock_blocked_pid
+    chmod 0664 /sys/module/metis/parameters/mi_lock_blocked_pid
     restorecon /sys/module/metis/parameters/mi_lock_blocked_pid
-    chmod 0666 /dev/mi_group
+    chown root system /dev/mi_group
+    chmod 0660 /dev/mi_group
     restorecon /dev/mi_group
-    chmod 0666 /dev/mi_frameload
+    chown root system /dev/mi_frameload
+    chmod 0660 /dev/mi_frameload
     restorecon /dev/mi_frameload
 
-    chmod 0666 /sys/module/metis/parameters/stask_prefer_cluster
+    chown root system /sys/module/metis/parameters/stask_prefer_cluster
+    chmod 0664 /sys/module/metis/parameters/stask_prefer_cluster
     restorecon /sys/module/metis/parameters/stask_prefer_cluster
-    chmod 0666 /sys/module/metis/parameters/render_prefer_cluster
+    chown root system /sys/module/metis/parameters/render_prefer_cluster
+    chmod 0664 /sys/module/metis/parameters/render_prefer_cluster
     restorecon /sys/module/metis/parameters/render_prefer_cluster
-    chmod 0666 /sys/module/metis/parameters/vip_prefer_cluster
+    chown root system /sys/module/metis/parameters/vip_prefer_cluster
+    chmod 0664 /sys/module/metis/parameters/vip_prefer_cluster
     restorecon /sys/module/metis/parameters/vip_prefer_cluster
-    chmod 0666 /sys/module/metis/parameters/ip_prefer_cluster
+    chown root system /sys/module/metis/parameters/ip_prefer_cluster
+    chmod 0664 /sys/module/metis/parameters/ip_prefer_cluster
     restorecon /sys/module/metis/parameters/ip_prefer_cluster
-    chmod 0666 /sys/module/metis/parameters/force_forbidden_walt_lb
+    chown root system /sys/module/metis/parameters/force_forbidden_walt_lb
+    chmod 0664 /sys/module/metis/parameters/force_forbidden_walt_lb
     restorecon /sys/module/metis/parameters/force_forbidden_walt_lb
-    chmod 0666 /sys/module/metis/parameters/force_viptask_select_rq
+    chown root system /sys/module/metis/parameters/force_viptask_select_rq
+    chmod 0664 /sys/module/metis/parameters/force_viptask_select_rq
     restorecon /sys/module/metis/parameters/force_viptask_select_rq
-    chmod 0666 /sys/module/metis/parameters/force_cluster_sched_enable
+    chown root system /sys/module/metis/parameters/force_cluster_sched_enable
+    chmod 0664 /sys/module/metis/parameters/force_cluster_sched_enable
     restorecon /sys/module/metis/parameters/force_cluster_sched_enable
 
     chmod 0666 /sys/module/migt/parameters/flt_target_fps
@@ -307,7 +342,8 @@ on post-fs-data
     restorecon /sys/module/migt/parameters/flt_cal_freq_enable
     chmod 0666 /sys/module/migt/parameters/flt_low_freq
     restorecon /sys/module/migt/parameters/flt_low_freq
-    chmod 0666 /sys/module/metis/parameters/flt_enable_other
+    chown root system /sys/module/metis/parameters/flt_enable_other
+    chmod 0664 /sys/module/metis/parameters/flt_enable_other
     restorecon /sys/module/metis/parameters/flt_enable_other
     chmod 0666 /sys/module/mist/parameters/dflt_stallratio_thresh
     restorecon /sys/module/mist/parameters/dflt_stallratio_thresh
@@ -346,7 +382,7 @@ on post-fs-data
     chmod 0666 /sys/module/speed_touch/parameters/vsync_period
     restorecon /sys/module/speed_touch/parameters/vsync_period
     chown root system /sys/module/speed_touch/parameters/vsync_period
-    chmod 0666 /sys/module/metis/parameters/speed_touch_enable
+    chmod 0664 /sys/module/metis/parameters/speed_touch_enable
     restorecon /sys/module/metis/parameters/speed_touch_enable
     chown root system /sys/module/metis/parameters/speed_touch_enable
 
@@ -456,7 +492,8 @@ on boot
     mkdir /mnt/vendor/persist/camera 0755 system cameraserver
 
     # XIAOMI ADD: enableForceFullRecoveryForCRC
-    chmod 0666 /sys/csiphy_umd_paras/csiphy_umd_paras
+    chown root system /sys/csiphy_umd_paras/csiphy_umd_paras
+    chmod 0664 /sys/csiphy_umd_paras/csiphy_umd_paras
     # END: enableForceFullRecoveryForCRC
 
     #MIUI ADD:Thermal_NodeReq
