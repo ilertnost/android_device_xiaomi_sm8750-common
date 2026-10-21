@@ -1,3 +1,6 @@
+# Bluetooth LE Audio (QTI BT audio HAL only provides the hardware offload session)
+ro.bluetooth.leaudio_offload.supported=true
+
 # DPM
 persist.vendor.dpm.feature=11
 
