@@ -1,0 +1,12 @@
+//
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+aconfig_values {
+    name: "aconfig-values-xiaomi_sm8750-common-bp4a-com.android.bluetooth.flags-all",
+    package: "com.android.bluetooth.flags",
+    srcs: [
+        "*.textproto",
+    ],
+}

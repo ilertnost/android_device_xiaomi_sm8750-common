@@ -1,0 +1,4 @@
+name: "bp4a"
+inherits: "bp3a"
+# This tree is a Soong namespace, so the value set must be fully qualified.
+aconfig_value_sets: "//device/xiaomi/sm8750-common:aconfig_value_set-xiaomi_sm8750-common-bp4a"

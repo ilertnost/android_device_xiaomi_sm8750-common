@@ -1,0 +1,10 @@
+# Some LE Audio earbuds (e.g. EarFun Free Pro 3, QCC3072) advertise EATT but
+# never answer ATT Read Multiple Variable Length Requests. The initial ASE read
+# then stalls until the peer drops the link, so LE Audio never connects.
+# Fall back to single characteristic reads.
+flag_value {
+  package: "com.android.bluetooth.flags"
+  name: "le_ase_read_multiple_variable"
+  state: DISABLED
+  permission: READ_ONLY
+}

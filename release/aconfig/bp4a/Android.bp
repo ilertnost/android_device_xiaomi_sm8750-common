@@ -1,0 +1,11 @@
+//
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+aconfig_value_set {
+    name: "aconfig_value_set-xiaomi_sm8750-common-bp4a",
+    srcs: [
+        "*/Android.bp",
+    ],
+}
