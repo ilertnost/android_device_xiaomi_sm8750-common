@@ -16,11 +16,6 @@ allow init nfc:binder call;
 # vendor_init needs to set fingerprint properties
 set_prop(vendor_init, vendor_fp_prop)
 
-# The face HAL start gate is published from /vendor/build.prop (stock parity);
-# without this, init refuses to set ro.vendor.miface.started and the
-# miface_start_wait_mitee_boot_completed.rc trigger never fires.
-set_prop(vendor_init, vendor_miface_prop)
-
 # Silence denials for bluetooth_prop and radio_prop (neverallow prevents access)
 dontaudit vendor_init bluetooth_prop:property_service set;
 dontaudit vendor_init radio_prop:file read;

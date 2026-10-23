@@ -127,14 +127,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.fingerprint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.fingerprint.xml
 
-# Face
-# The stock AIDL IFace/default HAL is packaged from the HyperOS image, so the
-# AOSP feature declaration stays in the vendor partition. crDroid's Sense based
-# FaceUnlock and its system_ext copy of this file are disabled on dada through
-# TARGET_FACE_UNLOCK_SUPPORTED.
-PRODUCT_COPY_FILES += \
-    frameworks/native/data/etc/android.hardware.biometrics.face.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.biometrics.face.xml
-
 # Qualcomm Configuration and Connectivity
 PRODUCT_PACKAGES += \
     QCC \

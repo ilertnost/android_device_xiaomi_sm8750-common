@@ -274,8 +274,3 @@ persist.vendor.audio.fluence.voicerec=false
 persist.vendor.audio.fluence.speaker=true
 persist.vendor.audio.call.tx.ns=true
 ro.vendor.audio.algorithm.support=Fluence
-
-# Face (stock parity)
-# Gates the miface_start_wait_mitee_boot_completed.rc trigger that starts the
-# stock AIDL IFace/default HAL after the MI-TEE VM reports boot completion.
-ro.vendor.miface.started=true

@@ -627,12 +627,6 @@ vendor/lib64/vendor.xiaomi.hardware.fx.tunnel-V1-ndk.so
 vendor/lib64/vendor.qti.hardware.fingerprint-V1-ndk.so
 vendor/lib64/vendor.qti.hardware.fingerprint@1.0.so
 
-# Face
-# Biometrics AIDL library used by the stock standard AIDL v4 face HAL. The
-# interface itself is built from source, so only the copy rule is generated to
-# keep the exact stock library in the vendor partition.
-vendor/lib64/android.hardware.biometrics.face-V4-ndk.so;MAKE_COPY_RULE_ONLY
-
 # Sensor interfaces loaded by the fingerprint and camera stacks.
 vendor/lib64/android.frameworks.sensorservice-V1-ndk.so;MAKE_COPY_RULE_ONLY
 vendor/lib64/android.hardware.sensors-V2-ndk.so;MAKE_COPY_RULE_ONLY
