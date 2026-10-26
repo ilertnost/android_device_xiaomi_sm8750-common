@@ -784,32 +784,3 @@ on property:ro.product.device=piano && property:ro.vendor.ril.oem.sno=*
     setprop ro.ril.oem.sno ${ro.vendor.ril.oem.sno}
 on property:ro.product.device=piano && property:ro.vendor.ril.oem.psno=*
     setprop ro.ril.oem.psno ${ro.vendor.ril.oem.psno}
-
-# Video enhancement (MEMC / AIE / AIS) mode.
-#
-# The media stack reads the volatile debug.media.video.{frc,vpp,ve,ais}
-# toggles, which every boot clears, from the persisted mode instead. Deriving
-# them here means they are set before any media process can cache them.
-on property:persist.vendor.media.video.mode=memc
-    setprop debug.media.video.frc true
-    setprop debug.media.video.vpp false
-    setprop debug.media.video.ve false
-    setprop debug.media.video.ais false
-
-on property:persist.vendor.media.video.mode=aie
-    setprop debug.media.video.frc false
-    setprop debug.media.video.vpp true
-    setprop debug.media.video.ve true
-    setprop debug.media.video.ais false
-
-on property:persist.vendor.media.video.mode=ais
-    setprop debug.media.video.frc false
-    setprop debug.media.video.vpp true
-    setprop debug.media.video.ve false
-    setprop debug.media.video.ais true
-
-on property:persist.vendor.media.video.mode=off
-    setprop debug.media.video.frc false
-    setprop debug.media.video.vpp false
-    setprop debug.media.video.ve false
-    setprop debug.media.video.ais false
