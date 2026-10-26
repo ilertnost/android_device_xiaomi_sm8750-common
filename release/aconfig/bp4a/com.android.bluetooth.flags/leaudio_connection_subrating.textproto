@@ -1,0 +1,10 @@
+# The WCN Bluetooth SoC firmware crashes (Hardware Error 0x0f, crash reason
+# 0xae) right after the host sends an LE Subrate Request for an LE Audio link,
+# so Bluetooth restarts in a loop while LE Audio earbuds keep reconnecting.
+# Stock's Bluetooth module has no automatic LE Audio subrating at all.
+flag_value {
+  package: "com.android.bluetooth.flags"
+  name: "leaudio_connection_subrating"
+  state: DISABLED
+  permission: READ_ONLY
+}
