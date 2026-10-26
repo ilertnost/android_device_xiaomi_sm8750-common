@@ -1700,8 +1700,10 @@ system_ext/lib64/vendor.qti.ImsRtpService-V2-ndk.so
 system_ext/lib64/vendor.qti.imsrtpservice@3.0.so
 system_ext/lib64/vendor.qti.imsrtpservice@3.1.so
 # Not in global dump
-#-vendor/lib64/libtensorflowlite_c_vendor.so
 vendor/lib64/vendor.xiaomi.hw.touchfeature-V1-ndk.so
+
+# TensorFlow Lite - used by the sound trigger and voice SDK libraries
+vendor/lib64/libtensorflowlite_c.so:vendor/lib64/libtensorflowlite_c_vendor.so
 
 # Not in global dump - built from source or not needed
 #vendor/lib64/libultrahdr_prebuilt.so
@@ -1779,7 +1781,6 @@ vendor/lib64/hw/libaudiocorehal.default.so;DISABLE_CHECKELF;DISABLE_DEPS
 vendor/lib64/android.hardware.audio.core.sounddose-V1-ndk.so;MAKE_COPY_RULE_ONLY
 vendor/etc/audio/audio_module_config_primary.xml
 vendor/etc/audio/sku_sun/quasar_config.xml
-vendor/etc/vintf/manifest/manifest_audiocorehal_default.xml
 vendor/lib64/hw/android.hardware.bluetooth.audio-impl-qti.so
 vendor/lib64/android.hardware.soundtrigger3-V1-ndk.so;MAKE_COPY_RULE_ONLY
 vendor/etc/vintf/manifest/soundtrigger.qti.xml

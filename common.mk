@@ -76,6 +76,7 @@ PRODUCT_PACKAGES += \
     libtinyalsav2.vendor \
     libmediautils_vendor.vendor \
     libaudiohalvendorextn \
+    manifest_audiocorehal_default.xml \
     qtiaudiohalvendorextn
 
 PRODUCT_COPY_FILES += \
