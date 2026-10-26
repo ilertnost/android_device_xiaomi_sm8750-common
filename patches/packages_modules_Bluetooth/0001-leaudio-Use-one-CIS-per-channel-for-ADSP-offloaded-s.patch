@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: turbo-boo <59400127+turbo-boo@users.noreply.github.com>
+Date: Fri, 23 Oct 2026 17:50:00 +0900
+Subject: [PATCH] leaudio: Use one CIS per channel for ADSP offloaded stereo
+ headsets
+
+A single LE Audio device that supports two channels per ASE gets the
+STEREO_ONE_CIS_PER_DEVICE strategy, so both channels share one CIS. The
+QTI ADSP offload path counts the active stream map entries as the
+encoder channel count, configures the BLE device as mono and the
+listener hears a downmix duplicated on both sides.
+
+When the codec runs on the ADSP and the device exposes at least two
+sink ASEs, use STEREO_TWO_CISES_PER_DEVICE so every channel gets its own
+CIS, as the offload path expects.
+---
+ system/bta/le_audio/device_groups.cc | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/system/bta/le_audio/device_groups.cc b/system/bta/le_audio/device_groups.cc
+index 69e444e..d9267b1 100644
+--- a/system/bta/le_audio/device_groups.cc
++++ b/system/bta/le_audio/device_groups.cc
+@@ -1433,6 +1433,16 @@ types::LeAudioConfigurationStrategy LeAudioDeviceGroup::GetGroupSinkStrategy() c
+         return types::LeAudioConfigurationStrategy::STEREO_TWO_CISES_PER_DEVICE;
+       }
+ 
++      /* The QTI ADSP offload path derives the encoder channel count from the
++       * number of active CISes, so two channels on a single CIS are downmixed
++       * to mono. Use one CIS per channel when the device has an ASE for each.
++       */
++      if (direction == types::kLeAudioDirectionSink &&
++          CodecManager::GetInstance()->GetCodecLocation() == types::CodecLocation::ADSP &&
++          device->GetAseCount(direction) >= 2) {
++        return types::LeAudioConfigurationStrategy::STEREO_TWO_CISES_PER_DEVICE;
++      }
++
+       return types::LeAudioConfigurationStrategy::STEREO_ONE_CIS_PER_DEVICE;
+     };
+     strategy_ = strategy_selector(types::kLeAudioDirectionSink);
+-- 
+2.43.0
+
