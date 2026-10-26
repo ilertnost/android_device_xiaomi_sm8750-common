@@ -1,0 +1,16 @@
+//
+// Copyright (C) 2026 The LineageOS Project
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+cc_library_shared {
+    name: "libcitsensorservice_shim",
+    vendor: true,
+    srcs: ["DisplayConfigShim.cpp"],
+    shared_libs: [
+        "libbinder_ndk",
+        "liblog",
+        "//vendor/qcom/opensource/commonsys-intf/display:vendor.qti.hardware.display.config-V12-ndk",
+    ],
+}

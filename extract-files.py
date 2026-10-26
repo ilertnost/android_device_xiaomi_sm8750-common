@@ -176,7 +176,8 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed(
             'libtinyxml2.so',
             'libtinyxml2-v34.so'
-        ),
+        )
+        .add_needed('libcitsensorservice_shim.so'),
      (
        'odm/lib64/libmiXmlParser.so',
        'vendor/bin/hw/audiohalservice.qti',
