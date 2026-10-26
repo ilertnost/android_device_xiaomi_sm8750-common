@@ -4,6 +4,12 @@
 //
 
 prebuilt_etc {
+    name: "charger_fstab.qti",
+    src: "etc/charger_fstab.qti",
+    recovery: true,
+}
+
+prebuilt_etc {
     name: "fstab.qcom",
     src: "etc/fstab.qcom",
     vendor: true,

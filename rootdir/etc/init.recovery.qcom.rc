@@ -49,7 +49,7 @@ on fs
     write /proc/sys/kernel/firmware_config/force_sysfs_fallback 1
     mkdir /vendor/firmware_mnt
     mkdir /vendor/firmware
-    mount_all /vendor/etc/charger_fstab.qti --early
+    mount_all /system/etc/charger_fstab.qti --early
     mount none /vendor/firmware_mnt/image /vendor/firmware bind rec
     wait /sys/kernel/boot_adsp/ssr
     write /sys/kernel/boot_adsp/ssr 1
