@@ -21,6 +21,7 @@
 #include <linux/input.h>
 #include <poll.h>
 #include <string.h>
+#include <sys/eventfd.h>
 #include <sys/ioctl.h>
 #include <thread>
 #include <unistd.h>
@@ -57,6 +58,8 @@
 #define GOODIX_CRC_VENDOR_CODE 41
 #define GOODIX_MAX_RETRIES 3
 #define GOODIX_RETRY_DELAY_MS 50
+
+#define MAX_TOUCH_SLOTS 10
 
 using ::aidl::android::hardware::biometrics::fingerprint::AcquiredInfo;
 
@@ -165,6 +168,30 @@ static int64_t nowMs() {
       .count();
 }
 
+// Linux multi-touch Type-B sends only the values that changed for the current
+// slot, so the receiver has to keep the full per-slot state itself.
+struct TouchSlot {
+  int32_t trackingId = -1;
+  int32_t x = 0;
+  int32_t y = 0;
+};
+
+struct InputMtRequest {
+  uint32_t code;
+  int32_t values[MAX_TOUCH_SLOTS];
+};
+
+static bool queryMtSlots(int fd, int32_t slotCount, uint32_t code,
+                         int32_t *values) {
+  InputMtRequest request = {};
+  request.code = code;
+  const size_t length = sizeof(request.code) + sizeof(int32_t) * slotCount;
+  if (ioctl(fd, EVIOCGMTSLOTS(length), &request) < 0)
+    return false;
+  memcpy(values, request.values, sizeof(int32_t) * slotCount);
+  return true;
+}
+
 } // anonymous namespace
 
 class SM8750UdfpsHandler : public UdfpsHandler {
@@ -181,6 +208,8 @@ public:
       close(mStopPipe[0]);
     if (mStopPipe[1] >= 0)
       close(mStopPipe[1]);
+    if (mWakeFd >= 0)
+      close(mWakeFd);
   }
 
   void init(fingerprint_device_t *device) {
@@ -188,10 +217,9 @@ public:
     const std::string fingerprintVendor =
         android::base::GetProperty("persist.vendor.sys.fp.vendor", "");
     mUseQcomIntr2 = fingerprintVendor == "qcom_us";
-    mUseGoodixTouchAuth = fingerprintVendor == "goodix_us";
+    mIsGoodix = fingerprintVendor == "goodix_us";
     LOG(INFO) << "Using QCOM intr2 handoff: " << mUseQcomIntr2;
-    LOG(INFO) << "Using Goodix touch auth lifecycle: "
-              << mUseGoodixTouchAuth;
+    LOG(INFO) << "Using Goodix backend: " << mIsGoodix;
 
     std::ifstream factorFile(TOUCH_RESOLUTION_FACTOR_PATH);
     factorFile >> mResolutionFactor;
@@ -202,6 +230,11 @@ public:
       PLOG(ERROR) << "Failed to create touch monitor stop pipe";
       return;
     }
+    // The retry deadline is armed from the HAL callback thread while the
+    // monitor sleeps in poll(); this fd makes that thread wake up.
+    mWakeFd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+    if (mWakeFd < 0)
+      PLOG(WARNING) << "Failed to create touch monitor wake event";
     mMonitorThread = std::thread(&SM8750UdfpsHandler::monitorTouch, this);
   }
 
@@ -234,7 +267,7 @@ public:
     LOG(DEBUG) << __func__ << " result: " << result
                << " vendorCode: " << vendorCode;
     // Goodix reports 201 before CRC code 41; consuming it would block retry.
-    if (!mUseGoodixTouchAuth &&
+    if (!mIsGoodix &&
         static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR &&
         (vendorCode == 201 || vendorCode == 202)) {
       // QFP has rejected this sample, but the physical contact is still down.
@@ -242,7 +275,7 @@ public:
       // an air reference, which must happen only after the finger is gone.
       mContactConsumed = true;
     }
-    if (mUseGoodixTouchAuth &&
+    if (mIsGoodix &&
         static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR &&
         vendorCode == GOODIX_CRC_VENDOR_CODE) {
       // Observed on goodix_us: each tap ends ~100ms later in
@@ -263,6 +296,7 @@ public:
         // the handler destructor's join remains the single owner.
         mRetryGeneration = mPressGeneration.load();
         mRetryDeadlineMs = nowMs() + GOODIX_RETRY_DELAY_MS;
+        wakeMonitor();
         LOG(INFO) << "Scheduling Goodix FOD retry, attempt " << attempt;
       }
     }
@@ -299,12 +333,13 @@ public:
 
 private:
   void startOperation() {
-    mTouchX = 0;
-    mTouchY = 0;
+    // The touch panel keeps reporting only changed values, so the last known
+    // coordinates stay valid across touches; reset capture state only.
     mCaptureSent = false;
     mContactConsumed = false;
     mRetryCount = 0;
     mRetryDeadlineMs = 0;
+    wakeMonitor();
     mPhysicalPressed = false;
     mOperationActive = true;
     mDevice->extCmd(mDevice, COMMAND_DISPLAY_STATUS, DISPLAY_STATUS_ON);
@@ -362,25 +397,22 @@ private:
       if (mUseQcomIntr2)
         writeState(QCOM_US_INTR2_PATH, true);
       writeState(DISPLAY_PRE_POWER_PATH, true);
-      // Stock mfp-daemon keeps Goodix FOD auth state asserted while a
-      // physical contact is being captured and clears it only when the
-      // operation finishes. Deasserting it here makes the touch controller
-      // withdraw the sample while Goodix is still reading it, which surfaces
-      // as RAW_DATA_CRC_FAILED and SPI_COMMUNICATION errors. Keep the existing
-      // qcom_us handoff unchanged.
-      if (mOperationActive && !mUseGoodixTouchAuth)
-        setTouchMode(TOUCH_MODE_FOD_AUTH, 0);
       // Stock posts its QFP down notification asynchronously after changing
       // the touch-panel auth state. Our direct extCmd path is synchronous, so
       // arm the panel before starting capture.
+      if (mOperationActive && !mIsGoodix)
+        setTouchMode(TOUCH_MODE_FOD_AUTH, 0);
       maybeSendPress();
+      // For every backend, stock mfp-daemon clears the FOD auth state on
+      // finger down, after posting the down command and film mode. goodix_us
+      // hands the capture to its own worker thread, so keep that order.
+      if (mOperationActive && mIsGoodix)
+        setTouchMode(TOUCH_MODE_FOD_AUTH, 0);
     } else {
       if (mUseQcomIntr2)
         writeState(QCOM_US_INTR2_PATH, false);
       writeState(DISPLAY_PRE_POWER_PATH, false);
       sendRelease();
-      mTouchX = 0;
-      mTouchY = 0;
       mContactConsumed = false;
       mRetryCount = 0;
       mRetryDeadlineMs = 0;
@@ -397,16 +429,90 @@ private:
       size_t count = static_cast<size_t>(bytes) / sizeof(input_event);
       for (size_t i = 0; i < count; i++) {
         const auto &event = events[i];
-        if (event.type != EV_ABS || event.value <= 0)
+        if (event.type != EV_ABS)
           continue;
-        if (event.code == ABS_MT_POSITION_X) {
-          mTouchX = event.value / mResolutionFactor;
-        } else if (event.code == ABS_MT_POSITION_Y) {
-          mTouchY = event.value / mResolutionFactor;
+        if (event.code == ABS_MT_SLOT) {
+          selectSlot(event.value);
+          continue;
+        }
+        TouchSlot &slot = mSlots[mCurrentSlot];
+        if (event.code == ABS_MT_TRACKING_ID) {
+          slot.trackingId = event.value;
+          // A contact that comes down without moving an axis reports no
+          // position for it; the slot still holds the coordinates.
+          if (event.value >= 0)
+            publishSlot(mCurrentSlot);
+        } else if (event.value > 0 && event.code == ABS_MT_POSITION_X) {
+          slot.x = event.value / mResolutionFactor;
+          publishSlot(mCurrentSlot);
+        } else if (event.value > 0 && event.code == ABS_MT_POSITION_Y) {
+          slot.y = event.value / mResolutionFactor;
+          publishSlot(mCurrentSlot);
         }
       }
     }
     maybeSendPress();
+  }
+
+  void selectSlot(int32_t slot) {
+    if (slot < 0 || slot >= mSlotCount)
+      return;
+    mCurrentSlot = slot;
+  }
+
+  // The panel keeps X/Y after a finger-up, so a re-touch that does not move an
+  // axis never reports that axis again and the stored value stays valid.
+  void publishSlot(int32_t slot) {
+    const TouchSlot &state = mSlots[slot];
+    if (state.x <= 0 || state.y <= 0)
+      return;
+    mTouchX = state.x;
+    mTouchY = state.y;
+  }
+
+  // Seed the slot state with what the panel currently holds, so a finger that
+  // is already down when the node is opened does not have to move first.
+  void initTouchSlots(int inputFd) {
+    struct input_absinfo absInfo = {};
+    mSlotCount = 1;
+    mCurrentSlot = 0;
+    // ABS_MT_SLOT reports the current slot in .value and the highest usable
+    // slot index in .maximum.
+    if (ioctl(inputFd, EVIOCGABS(ABS_MT_SLOT), &absInfo) >= 0) {
+      if (absInfo.maximum >= 0) {
+        const int32_t slots = absInfo.maximum + 1;
+        mSlotCount = slots < MAX_TOUCH_SLOTS ? slots : MAX_TOUCH_SLOTS;
+      }
+      selectSlot(absInfo.value);
+    }
+
+    int32_t values[MAX_TOUCH_SLOTS] = {};
+    if (queryMtSlots(inputFd, mSlotCount, ABS_MT_TRACKING_ID, values)) {
+      for (int32_t i = 0; i < mSlotCount; i++)
+        mSlots[i].trackingId = values[i];
+    }
+    if (queryMtSlots(inputFd, mSlotCount, ABS_MT_POSITION_X, values)) {
+      for (int32_t i = 0; i < mSlotCount; i++)
+        mSlots[i].x = values[i] > 0 ? values[i] / mResolutionFactor : 0;
+    }
+    if (queryMtSlots(inputFd, mSlotCount, ABS_MT_POSITION_Y, values)) {
+      for (int32_t i = 0; i < mSlotCount; i++)
+        mSlots[i].y = values[i] > 0 ? values[i] / mResolutionFactor : 0;
+    }
+
+    for (int32_t i = 0; i < mSlotCount; i++) {
+      if (mSlots[i].trackingId >= 0) {
+        publishSlot(i);
+        break;
+      }
+    }
+  }
+
+  void wakeMonitor() {
+    if (mWakeFd < 0)
+      return;
+    const uint64_t value = 1;
+    TEMP_FAILURE_RETRY(write(mWakeFd, &value, sizeof(value)));
   }
 
   void maybeRunRetry() {
@@ -436,12 +542,15 @@ private:
     mInputUnavailable = inputFd < 0;
     if (mInputUnavailable)
       LOG(WARNING) << "Touch input unavailable; using overlay coordinates";
+    else
+      initTouchSlots(inputFd);
 
     char initialState = '0';
     TEMP_FAILURE_RETRY(pread(statusFd, &initialState, sizeof(initialState), 0));
 
     pollfd fds[] = {
         {.fd = mStopPipe[0], .events = POLLIN},
+        {.fd = mWakeFd, .events = POLLIN},
         {.fd = statusFd, .events = POLLERR | POLLPRI},
         {.fd = inputFd, .events = POLLIN},
     };
@@ -456,7 +565,7 @@ private:
                                       : 0;
       }
 
-      int count = TEMP_FAILURE_RETRY(poll(fds, 3, timeout));
+      int count = TEMP_FAILURE_RETRY(poll(fds, 4, timeout));
       if (count > 0) {
         if (fds[0].revents & POLLIN) {
           char value;
@@ -464,9 +573,16 @@ private:
           break;
         }
 
-        if (inputFd >= 0 && (fds[2].revents & POLLIN))
+        // A retry was armed from the HAL callback thread; drain the counter so
+        // the next iteration recomputes its timeout from the new deadline.
+        if (fds[1].revents & POLLIN) {
+          uint64_t value;
+          TEMP_FAILURE_RETRY(read(mWakeFd, &value, sizeof(value)));
+        }
+
+        if (inputFd >= 0 && (fds[3].revents & POLLIN))
           handleInputEvents(inputFd);
-        if (fds[1].revents & (POLLERR | POLLPRI)) {
+        if (fds[2].revents & (POLLERR | POLLPRI)) {
           char state = '0';
           if (TEMP_FAILURE_RETRY(pread(statusFd, &state, sizeof(state), 0)) ==
               1) {
@@ -486,9 +602,15 @@ private:
   fingerprint_device_t *mDevice = nullptr;
   std::thread mMonitorThread;
   int mStopPipe[2] = {-1, -1};
+  int mWakeFd = -1;
   int32_t mResolutionFactor = 1;
   bool mUseQcomIntr2 = false;
-  bool mUseGoodixTouchAuth = false;
+  bool mIsGoodix = false;
+  // Owned by monitorTouch(); the published coordinates stay atomic because
+  // the HAL callback thread reads them.
+  TouchSlot mSlots[MAX_TOUCH_SLOTS];
+  int32_t mSlotCount = 1;
+  int32_t mCurrentSlot = 0;
   std::atomic_bool mStop = false;
   std::atomic_bool mOperationActive = false;
   std::atomic_bool mPhysicalPressed = false;
