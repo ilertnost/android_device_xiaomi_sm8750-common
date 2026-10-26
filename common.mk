@@ -107,10 +107,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.camera.full.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.full.xml \
     frameworks/native/data/etc/android.hardware.camera.raw.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.raw.xml
 
-# Camera - Aperture privapp permissions
-PRODUCT_COPY_FILES += \
-    device/xiaomi/sm8750-common/permissions/privapp-permissions-aperture.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-aperture.xml
-
 # DRM
 PRODUCT_PACKAGES += \
     android.hardware.drm-service.clearkey
