@@ -1,34 +1,35 @@
-From fb7d841d89650cb25973aa558e5f23c694dc0944 Mon Sep 17 00:00:00 2001
+From b838b68d69982d679dd4c131456f4b9ac9408e75 Mon Sep 17 00:00:00 2001
 From: turbo-boo <59400127+turbo-boo@users.noreply.github.com>
-Date: Tue, 30 Jun 2026 09:28:57 +0900
-Subject: [PATCH 1/2] display: Add Xiaomi panel and CWB sensor integration
+Date: Sun, 4 Oct 2026 12:52:32 +0900
+Subject: [PATCH] display: Add Xiaomi CWB sensor integration
+
+Notify Xiaomi's CIT sensor service through libclient2slpi.notifier on
+built-in display frame updates when vendor.display.enable_cwb_notify_sensor
+is set, so the under-display light sensor can trigger CWB sampling.
 
 Change-Id: I67dd5db1eb0d1f9975190ef0efb48be96fd4a18a
 ---
- Android.bp                        | 35 +++++++++++++++++++++++++++++++
+ Android.bp                        | 25 +++++++++++++++++++++++++
  include/display_properties.h      |  1 +
- sdm/libs/dal/Android.bp           |  5 ++++-
- sdm/libs/dal/hw_device_drm.cpp    | 16 ++++++++++++++
  sdmclient/Android.bp              |  5 ++++-
- sdmclient/client_rgb_notifier.h   | 20 ++++++++++++++++++
- sdmclient/sdm_display.cpp         | 12 +++++++++++
+ sdmclient/client_rgb_notifier.h   | 20 ++++++++++++++++++++
+ sdmclient/sdm_display.cpp         | 12 ++++++++++++
  sdmclient/sdm_display.h           |  7 +++++++
  sdmclient/sdm_display_builtin.cpp |  7 +++++++
- 9 files changed, 106 insertions(+), 2 deletions(-)
+ 7 files changed, 76 insertions(+), 1 deletion(-)
  create mode 100644 sdmclient/client_rgb_notifier.h
 
 diff --git a/Android.bp b/Android.bp
-index e85c6b9..60a67ea 100644
+index e85c6b9..d7ed948 100644
 --- a/Android.bp
 +++ b/Android.bp
-@@ -1,3 +1,38 @@
+@@ -1,3 +1,28 @@
 +soong_config_module_type {
 +    name: "xiaomi_display_cc_defaults",
 +    module_type: "cc_defaults",
 +    config_namespace: "xiaomi_display",
 +    bool_variables: [
 +        "cwb_notify_sensor",
-+        "panel_dimensions_tenths_mm",
 +    ],
 +    properties: [
 +        "cflags",
@@ -48,15 +49,6 @@ index e85c6b9..60a67ea 100644
 +    },
 +}
 +
-+xiaomi_display_cc_defaults {
-+    name: "xiaomi_panel_dimensions_defaults",
-+    soong_config_variables: {
-+        panel_dimensions_tenths_mm: {
-+            cflags: ["-DXIAOMI_PANEL_DIMENSIONS_TENTHS_MM"],
-+        },
-+    },
-+}
-+
  cc_library_headers {
      name: "display_debug_headers",
      vendor: true,
@@ -72,48 +64,6 @@ index b31f701..bbb3fe8 100644
  #define ENABLE_ASYNC_POWER_OFF_WAIT          DISPLAY_PROP("enable_async_power_off_wait")
  #define TRANSIENT_FPS_CYCLE_COUNT            DISPLAY_PROP("transient_fps_cycle_count")
  #define CORE_ID_MASK                         DISPLAY_PROP("core_id_mask")
-diff --git a/sdm/libs/dal/Android.bp b/sdm/libs/dal/Android.bp
-index a77cf1b..9be5776 100644
---- a/sdm/libs/dal/Android.bp
-+++ b/sdm/libs/dal/Android.bp
-@@ -1,6 +1,9 @@
- cc_library_shared {
-     name: "libsdmdal",
--    defaults: ["qtidisplay_defaults"],
-+    defaults: [
-+        "qtidisplay_defaults",
-+        "xiaomi_panel_dimensions_defaults",
-+    ],
-     sanitize: {
-         integer_overflow: true,
-     },
-diff --git a/sdm/libs/dal/hw_device_drm.cpp b/sdm/libs/dal/hw_device_drm.cpp
-index b77c246..c21e9df 100644
---- a/sdm/libs/dal/hw_device_drm.cpp
-+++ b/sdm/libs/dal/hw_device_drm.cpp
-@@ -945,6 +945,22 @@ DisplayError HWDeviceDRM::PopulateDisplayAttributes(uint32_t index) {
-     DLOGW("Driver doesn't report panel physical width and height - defaulting to 320dpi");
-   }
- 
-+#ifdef XIAOMI_PANEL_DIMENSIONS_TENTHS_MM
-+  // Some Xiaomi built-in panel drivers report dimensions in tenths of a
-+  // millimetre through DRM connector fields, which DRM defines in millimetres.
-+  // Retain the DPI sanity check so a corrected kernel is not scaled twice.
-+  if (disp_type_ == DRMDisplayType::PERIPHERAL) {
-+    const float x_dpi = (FLOAT(mode.hdisplay) * 25.4f) / FLOAT(mm_width);
-+    const float y_dpi = (FLOAT(mode.vdisplay) * 25.4f) / FLOAT(mm_height);
-+    if (x_dpi < 100.0f && y_dpi < 100.0f) {
-+      DLOGW("Correcting built-in panel dimensions from 0.1mm units: %ux%umm", mm_width,
-+            mm_height);
-+      mm_width = (mm_width + 5) / 10;
-+      mm_height = (mm_height + 5) / 10;
-+    }
-+  }
-+#endif
-+
-   display_attributes_[index].x_dpi = (FLOAT(mode.hdisplay) * 25.4f) / FLOAT(mm_width);
-   display_attributes_[index].y_dpi = (FLOAT(mode.vdisplay) * 25.4f) / FLOAT(mm_height);
-   SetTopology(topology, &display_attributes_[index].topology);
 diff --git a/sdmclient/Android.bp b/sdmclient/Android.bp
 index 69865e8..9e07ee5 100644
 --- a/sdmclient/Android.bp
@@ -156,7 +106,7 @@ index 0000000..0c7149d
 +
 +#endif  // __CLIENT_RGB_NOTIFIER_H__
 diff --git a/sdmclient/sdm_display.cpp b/sdmclient/sdm_display.cpp
-index ed1cd1b..9bd18d5 100644
+index bd34194..8da2254 100644
 --- a/sdmclient/sdm_display.cpp
 +++ b/sdmclient/sdm_display.cpp
 @@ -582,6 +582,18 @@ DisplayError SDMDisplay::Init() {
@@ -221,3 +171,6 @@ index f17b60d..59b3fad 100644
    prepare_phase_ = false;
  
    // Need a commit call to flush the dsi dynamic clock
+-- 
+2.43.0
+
