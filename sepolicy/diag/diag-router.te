@@ -1,0 +1,37 @@
+# The CAF policy for diag-router and its HAL lives in
+# device/qcom/sepolicy_vndr/sm8750/generic/vendor/test, which is only built
+# into userdebug and eng builds, while the stock init script starts
+# diag-router on every build. This mirrors it for user builds, as the stock
+# user build does, without the rule that lets it signal su.
+
+type vendor_diag-router, domain;
+type vendor_diag-router_exec, exec_type, vendor_file_type, file_type;
+type vendor_hal_diaghal_service, hal_service_type, protected_service, service_manager_type;
+type vendor_hal_diaghal_hwservice, hwservice_manager_type, protected_hwservice;
+
+init_daemon_domain(vendor_diag-router)
+hal_server_domain(vendor_diag-router, vendor_hal_diaghal)
+hal_client_domain(vendor_diag-router, hal_allocator)
+
+binder_call(vendor_hal_diaghal_client, vendor_hal_diaghal_server)
+binder_call(vendor_hal_diaghal_server, vendor_hal_diaghal_client)
+binder_call(vendor_hal_diaghal_server, servicemanager)
+hal_attribute_hwservice(vendor_hal_diaghal, vendor_hal_diaghal_hwservice)
+hal_attribute_service(vendor_hal_diaghal, vendor_hal_diaghal_service)
+
+r_dir_file(vendor_diag-router, vendor_sysfs_soc)
+r_dir_file(vendor_diag-router, vendor_sysfs_qdss_dev)
+allow vendor_diag-router vendor_sysfs_soc:file w_file_perms;
+allow vendor_diag-router vendor_sysfs_qdss_dev:file w_file_perms;
+
+allow vendor_diag-router functionfs:dir r_dir_perms;
+allow vendor_diag-router functionfs:file rw_file_perms;
+allowxperm vendor_diag-router functionfs:file ioctl FUNCTIONFS_ENDPOINT_DESC;
+
+allow vendor_diag-router self:qipcrtr_socket create_socket_perms_no_ioctl;
+allow vendor_diag-router vendor_mhi_diag_device:chr_file rw_file_perms;
+allow vendor_diag-router self:netlink_kobject_uevent_socket create_socket_perms_no_ioctl;
+allow vendor_diag-router self:capability kill;
+allow vendor_diag-router kmsg_device:chr_file { getattr write open };
+
+allow { domain -coredomain -hal_configstore -vendor_init } vendor_diag-router:unix_stream_socket connectto;
