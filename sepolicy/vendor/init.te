@@ -24,6 +24,6 @@ dontaudit vendor_init radio_prop:file read;
 allow init debugfs_tracing_debug:dir mounton;
 
 # Lineage Health charging control - allow init to chown cc_toggle
-allow vendor_init vendor_sysfs_qcom_battery:dir search;
-allow vendor_init vendor_sysfs_qcom_battery:file setattr;
-allow vendor_init vendor_sysfs_qcom_battery:lnk_file { getattr read };
+allow vendor_init vendor_sysfs_battery_supply:dir search;
+allow vendor_init vendor_sysfs_battery_supply:file setattr;
+allow vendor_init vendor_sysfs_battery_supply:lnk_file { getattr read };
