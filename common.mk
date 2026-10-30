@@ -124,24 +124,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.fingerprint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.fingerprint.xml
 
-# Qualcomm Configuration and Connectivity
-PRODUCT_PACKAGES += \
-    QCC \
-    qccsyshal_aidl-service \
-    libqcc \
-    libqcc_file_agent_sys \
-    libqcc_netstats \
-    libqccdme \
-    libqccfileservice \
-    vendor.qti.hardware.qccsyshal@1.0 \
-    vendor.qti.hardware.qccsyshal@1.1 \
-    vendor.qti.hardware.qccsyshal@1.2-halimpl \
-    vendor.qti.hardware.qccsyshal@1.2 \
-    vendor.qti.hardware.qccvndhal@1.0 \
-    vendor.qti.qccsyshal_aidl-V1-ndk_system_ext \
-    vendor.qti.qccsyshal_aidl-halimpl \
-    vendor.qti.qccvndhal_aidl-V1-ndk_system_ext
-
 # GPS
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.location.gps.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.location.gps.xml
