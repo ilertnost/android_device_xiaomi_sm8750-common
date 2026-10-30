@@ -1737,7 +1737,6 @@ vendor/lib64/vendor.qti.hardware.agm-V1-ndk.so
 # Audio AIDL libraries needed by the stock audio stack
 vendor/lib64/com.android.ozoaudio.notify-V1-ndk.so
 vendor/lib64/android.media.audio.common.types-V3-ndk.so;MAKE_COPY_RULE_ONLY
-vendor/lib64/android.media.audio.common.types-V6-ndk.so
 vendor/lib64/android.hardware.audio.core-V2-ndk.so;MAKE_COPY_RULE_ONLY
 vendor/lib64/android.hardware.audio.core.sounddose-V2-ndk.so;MAKE_COPY_RULE_ONLY
 vendor/lib64/android.hardware.audio.effect-V2-ndk.so;MAKE_COPY_RULE_ONLY
