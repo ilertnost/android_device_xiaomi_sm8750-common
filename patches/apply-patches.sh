@@ -23,7 +23,7 @@
 #
 
 TOP=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)
-TMP=$(mktemp -d)
+TMP=$(mktemp -d -p "$TOP")
 trap 'rm -rf "$TMP"' EXIT
 
 log() {
