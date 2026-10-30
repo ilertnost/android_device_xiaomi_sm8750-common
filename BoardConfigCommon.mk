@@ -16,7 +16,7 @@ BOARD_SHIPPING_API_LEVEL := 202404
 
 # bp4a exposes the frozen 202504 vendor policy API. New genfs labels are
 # authored against that API while the shipping property remains 202404.
-BOARD_GENFS_LABELS_VERSION := 202504
+BOARD_GENFS_LABELS_VERSION := 202604
 
 # A/B
 AB_OTA_UPDATER := true
