@@ -469,19 +469,21 @@ vendor/lib64/vendor.qti.diaghal@1.0.so
 
 # Displayfeature (configs)
 odm/etc/df_default.xml
+vendor/etc/displayconfig/display_layout_configuration.xml
 vendor/etc/displayconfig/display_id_4630946916234099603.xml
 vendor/etc/displayconfig/display_id_4630947039571902850.xml
 vendor/etc/displayconfig/display_id_4630947039571902851.xml
 vendor/etc/displayconfig/display_id_4630947075271898515.xml
 
 # Displayfeature (libs)
-odm/lib64/hw/displayfeature.default.so
+odm/lib64/hw/displayfeature.default.so;DISABLE_CHECKELF
 odm/lib64/libadaptivehdr.so
 odm/lib64/libbarrage.so
 odm/lib64/libcolortempmode.so
 odm/lib64/libdisplaycount.so
 odm/lib64/libdisplaylog.so
 odm/lib64/libdither.so
+odm/lib64/libdynamicelvss.so
 odm/lib64/libeyecare.so
 odm/lib64/libfcmintf.so
 odm/lib64/libflatmode.so
@@ -565,14 +567,6 @@ vendor/etc/display/DPU9__.xml
 vendor/etc/display/formats.json
 vendor/etc/display/graphics_alignments.json
 vendor/etc/display/pipe_config_DPU11__.xml
-vendor/etc/display/sm8750_sr_1x_y1280x720.dlc
-vendor/etc/display/sm8750_sr_1x_y720x1280.dlc
-vendor/etc/display/sm8750_sr_2x_y1280x720.dlc
-vendor/etc/display/sm8750_sr_2x_y544x960.dlc
-vendor/etc/display/sm8750_sr_2x_y720x1280.dlc
-vendor/etc/display/sm8750_sr_2x_y960x544.dlc
-vendor/etc/display/sm8750_sr_3x_y384x640.dlc
-vendor/etc/display/sm8750_sr_3x_y640x384.dlc
 vendor/etc/display/thermallevel_to_fps.xml
 vendor/etc/display/ubwc_alignments.json
 vendor/etc/display/video_alignments.json
@@ -803,7 +797,7 @@ system_ext/framework/vendor.qti.ims.rcssip-V1.2-java.jar
 system_ext/framework/vendor.qti.ims.rcsuce-V1.0-java.jar
 system_ext/framework/vendor.qti.ims.rcsuce-V1.1-java.jar
 system_ext/framework/vendor.qti.ims.rcsuce-V1.2-java.jar
-system_ext/priv-app/ims/ims.apk;REQUIRED=QtiTelephonyCompat|309b0cf24f335a1d974798cf85d697e89ddf3323
+system_ext/priv-app/ims/ims.apk;REQUIRED=QtiTelephonyCompat
 vendor/bin/ims-dataservice-daemon
 vendor/bin/ims_rtp_daemon
 vendor/bin/imsdaemon
@@ -1088,7 +1082,6 @@ system_ext/lib64/libqccfileservice.so
 system_ext/lib64/vendor.qti.hardware.qccsyshal@1.0.so
 system_ext/lib64/vendor.qti.hardware.qccsyshal@1.1.so
 system_ext/lib64/vendor.qti.hardware.qccsyshal@1.2-halimpl.so
-system/lib64/libprotobuf-cpp-full.so:system_ext/lib64/libprotobuf-cpp-qccx.so
 system_ext/lib64/vendor.qti.hardware.qccsyshal@1.2.so
 system_ext/lib64/vendor.qti.hardware.qccvndhal@1.0.so
 system_ext/lib64/vendor.qti.qccsyshal_aidl-V1-ndk.so;MODULE_SUFFIX=_system_ext
@@ -1110,13 +1103,8 @@ vendor/bin/init.qti.qcv.sh
 vendor/etc/init/init.qti.qcv.rc
 
 # QESDK
-vendor/bin/qesdk-manager
 vendor/bin/snapdragon_services
-vendor/etc/init/qesdk-manager.rc
 vendor/etc/init/snapdragon_services.rc
-vendor/etc/seccomp_policy/qesdk.policy
-vendor/etc/seccomp_policy/qesdksec.policy
-vendor/etc/vintf/manifest/qesdk-manager.xml
 vendor/etc/vintf/manifest/snapdragon_services.xml
 vendor/lib64/libqesdoem_query_sys.so
 vendor/lib64/libqesdk2_0.so
@@ -1209,7 +1197,6 @@ product/etc/permissions/UimService.xml
 product/framework/uimgbalibrary.jar
 product/framework/uimgbamanagerlibrary.jar
 product/framework/uimservicelibrary.jar
-system_ext/app/QtiTelephonyService/QtiTelephonyService.apk
 system_ext/etc/permissions/qcrilhook.xml
 system_ext/framework/qcrilhook.jar
 system_ext/etc/permissions/qti_permissions.xml
@@ -1694,8 +1681,7 @@ system_ext/lib64/lib-imsvt.so
 system_ext/lib64/lib-imsvtextutils.so
 system_ext/lib64/lib-imsvtutils.so
 system_ext/lib64/libdiag_system.so
-system_ext/lib64/libimscamera_jni.so;SYMLINK=system_ext/priv-app/ims/lib/arm64/libimscamera_jni.so|1eac50a6667c694db20c440615591cfb59a9c500
-system_ext/lib64/libimsmedia_jni.so;SYMLINK=system_ext/priv-app/ims/lib/arm64/libimsmedia_jni.so|e8a7ddf23e00c8a72a287aaf229d22a1839788d1
+system_ext/lib64/libimsmedia_jni.so;SYMLINK=system_ext/priv-app/ims/lib/arm64/libimsmedia_jni.so
 system_ext/lib64/vendor.qti.ImsRtpService-V2-ndk.so
 system_ext/lib64/vendor.qti.imsrtpservice@3.0.so
 system_ext/lib64/vendor.qti.imsrtpservice@3.1.so
@@ -2032,7 +2018,6 @@ system_ext/framework/vendor.qti.ims.uceaidlservice-V1-java.jar;MAKE_COPY_RULE_ON
 system_ext/framework/vendor.qti.imsdatachannel.jar;MAKE_COPY_RULE_ONLY
 system_ext/framework/vendor.xiaomi.hardware.satellite-V1-java.jar;MAKE_COPY_RULE_ONLY
 system_ext/framework/xiaomi-telephony-common.jar;MAKE_COPY_RULE_ONLY
-system_ext/framework/xm-framework-telephony-aidl.jar;MAKE_COPY_RULE_ONLY
 system_ext/framework/xm-telephony-base.jar;MAKE_COPY_RULE_ONLY
 system_ext/framework/xm-telephony-common.jar;MAKE_COPY_RULE_ONLY
 

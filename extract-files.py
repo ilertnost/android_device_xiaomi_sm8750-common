@@ -116,6 +116,7 @@ blob_fixups: blob_fixups_user_type = {
        'odm/lib64/libadaptivehdr.so',
        'odm/lib64/libcolortempmode.so',
        'odm/lib64/libdither.so',
+       'odm/lib64/libdynamicelvss.so',
        'odm/lib64/libflatmode.so',
        'odm/lib64/libhistprocess.so',
        'odm/lib64/libmiBrightness.so',
