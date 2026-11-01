@@ -8,630 +8,75 @@
 
 #include <aidl/android/hardware/biometrics/fingerprint/BnFingerprint.h>
 #include <android-base/logging.h>
-#include <android-base/properties.h>
 #include <android-base/unique_fd.h>
-#include <android/binder_manager.h>
 
-#include <atomic>
-#include <chrono>
-#include <cstdint>
-#include <dirent.h>
-#include <fcntl.h>
 #include <fstream>
-#include <linux/input.h>
-#include <poll.h>
-#include <string.h>
-#include <sys/eventfd.h>
-#include <sys/ioctl.h>
-#include <thread>
-#include <unistd.h>
 
 #include "UdfpsHandler.h"
-#include "TouchFeatureCompat.h"
 
 #define COMMAND_FOD_PRESS_STATUS 1
 #define COMMAND_FOD_PRESS_X 2
 #define COMMAND_FOD_PRESS_Y 3
-#define COMMAND_DISPLAY_STATUS 14
-#define COMMAND_FILM_MODE 15
 #define PARAM_FOD_PRESSED 1
 #define PARAM_FOD_RELEASED 0
-
-#define TOUCH_FEATURE_SERVICE                                                  \
-  "vendor.xiaomi.hw.touchfeature.ITouchFeature/default"
-#define TOUCH_ID_PRIMARY 0
-#define TOUCH_MODE_FOD_ENABLE 10
-#define TOUCH_MODE_FOD_AUTH 41
-#define TOUCH_MODE_FILM 1015
-
-#define FOD_PRESS_STATUS_PATH "/sys/class/touch/touch_dev/fod_press_status"
-#define TOUCH_RESOLUTION_FACTOR_PATH                                           \
-  "/sys/class/touch/touch_dev/resolution_factor"
-#define TOUCH_INPUT_NAME "Xiaomi_Touch_Input_0"
-#define QCOM_US_INTR2_PATH "/sys/class/xiaomi_fp/xiaomi-fp/device/intr2"
-#define DISPLAY_PRE_POWER_PATH                                                 \
-  "/sys/bus/platform/devices/soc:xiaomi_fingerprint/fingerdown"
-
-#define DISPLAY_STATUS_ON 2
-#define FILM_MODE_OFF 0
-
-#define GOODIX_CRC_VENDOR_CODE 41
-#define GOODIX_MAX_RETRIES 3
-#define GOODIX_RETRY_DELAY_MS 50
-
-#define MAX_TOUCH_SLOTS 10
 
 using ::aidl::android::hardware::biometrics::fingerprint::AcquiredInfo;
 
 namespace {
 
-using ::aidl::vendor::xiaomi::hw::touchfeature::ITouchFeature;
-
-static std::shared_ptr<ITouchFeature> getTouchFeature() {
-  ndk::SpAIBinder binder(AServiceManager_checkService(TOUCH_FEATURE_SERVICE));
-  if (binder.get() == nullptr)
-    return nullptr;
-  return ITouchFeature::fromBinder(binder);
+template <typename T>
+static void set(const std::string& path, const T& value) {
+    std::ofstream file(path);
+    file << value;
 }
 
-static bool setTouchMode(int32_t mode, int32_t value) {
-  auto service = getTouchFeature();
-  if (service == nullptr) {
-    LOG(ERROR) << "TouchFeature service is unavailable";
-    return false;
-  }
-
-  int32_t result = -1;
-  auto status =
-      service->setModeValue(TOUCH_ID_PRIMARY, mode, value, &result);
-  if (!status.isOk() || result != 0) {
-    LOG(ERROR) << "Failed to set touch mode " << mode << " to " << value
-               << ": status=" << status.getDescription()
-               << " result=" << result;
-    return false;
-  }
-
-  LOG(INFO) << "Set touch mode " << mode << " to " << value;
-  return true;
-}
-
-static int32_t getTouchFilmMode() {
-  auto service = getTouchFeature();
-  if (service == nullptr) {
-    return FILM_MODE_OFF;
-  }
-
-  std::string value;
-  auto status = service->getModeCurValueString(TOUCH_ID_PRIMARY,
-                                                TOUCH_MODE_FILM, &value);
-  if (!status.isOk()) {
-    LOG(WARNING) << "Failed to read touch film mode: "
-                 << status.getDescription();
-    return FILM_MODE_OFF;
-  }
-  if (value == "1")
-    return 1;
-  if (value == "2")
-    return 2;
-  return FILM_MODE_OFF;
-}
-
-static int openTouchInput() {
-  DIR *inputDir = opendir("/dev/input");
-  if (inputDir == nullptr) {
-    PLOG(ERROR) << "Failed to open /dev/input";
-    return -1;
-  }
-
-  int inputFd = -1;
-  while (dirent *entry = readdir(inputDir)) {
-    if (strncmp(entry->d_name, "event", 5) != 0)
-      continue;
-
-    std::string path = std::string("/dev/input/") + entry->d_name;
-    int fd = open(path.c_str(), O_RDONLY | O_CLOEXEC | O_NONBLOCK);
-    if (fd < 0)
-      continue;
-
-    char name[128] = {};
-    if (ioctl(fd, EVIOCGNAME(sizeof(name)), name) >= 0 &&
-        name == std::string(TOUCH_INPUT_NAME)) {
-      LOG(INFO) << "Monitoring FOD coordinates from " << path;
-      inputFd = fd;
-      break;
-    }
-    close(fd);
-  }
-  closedir(inputDir);
-  return inputFd;
-}
-
-static bool writeState(const char *path, bool enabled) {
-  android::base::unique_fd fd(open(path, O_WRONLY | O_CLOEXEC));
-  if (fd.get() < 0) {
-    PLOG(ERROR) << "Failed to open " << path;
-    return false;
-  }
-
-  const char value[] = {enabled ? '1' : '0', '\n'};
-  if (TEMP_FAILURE_RETRY(write(fd.get(), value, sizeof(value))) !=
-      sizeof(value)) {
-    PLOG(ERROR) << "Failed to write " << path;
-    return false;
-  }
-  return true;
-}
-
-static int64_t nowMs() {
-  return std::chrono::duration_cast<std::chrono::milliseconds>(
-             std::chrono::steady_clock::now().time_since_epoch())
-      .count();
-}
-
-// Linux multi-touch Type-B sends only the values that changed for the current
-// slot, so the receiver has to keep the full per-slot state itself.
-struct TouchSlot {
-  int32_t trackingId = -1;
-  int32_t x = 0;
-  int32_t y = 0;
-};
-
-struct InputMtRequest {
-  uint32_t code;
-  int32_t values[MAX_TOUCH_SLOTS];
-};
-
-static bool queryMtSlots(int fd, int32_t slotCount, uint32_t code,
-                         int32_t *values) {
-  InputMtRequest request = {};
-  request.code = code;
-  const size_t length = sizeof(request.code) + sizeof(int32_t) * slotCount;
-  if (ioctl(fd, EVIOCGMTSLOTS(length), &request) < 0)
-    return false;
-  memcpy(values, request.values, sizeof(int32_t) * slotCount);
-  return true;
-}
-
-} // anonymous namespace
+}  // anonymous namespace
 
 class SM8750UdfpsHandler : public UdfpsHandler {
-public:
-  ~SM8750UdfpsHandler() override {
-    mStop = true;
-    if (mStopPipe[1] >= 0) {
-      char value = 1;
-      TEMP_FAILURE_RETRY(write(mStopPipe[1], &value, sizeof(value)));
+  public:
+    void init(fingerprint_device_t* device) {
+        mDevice = device;
     }
-    if (mMonitorThread.joinable())
-      mMonitorThread.join();
-    if (mStopPipe[0] >= 0)
-      close(mStopPipe[0]);
-    if (mStopPipe[1] >= 0)
-      close(mStopPipe[1]);
-    if (mWakeFd >= 0)
-      close(mWakeFd);
-  }
 
-  void init(fingerprint_device_t *device) {
-    mDevice = device;
-    const std::string fingerprintVendor =
-        android::base::GetProperty("persist.vendor.sys.fp.vendor", "");
-    mUseQcomIntr2 = fingerprintVendor == "qcom_us";
-    mIsGoodix = fingerprintVendor == "goodix_us";
-    LOG(INFO) << "Using QCOM intr2 handoff: " << mUseQcomIntr2;
-    LOG(INFO) << "Using Goodix backend: " << mIsGoodix;
-
-    std::ifstream factorFile(TOUCH_RESOLUTION_FACTOR_PATH);
-    factorFile >> mResolutionFactor;
-    if (mResolutionFactor <= 0)
-      mResolutionFactor = 1;
-
-    if (pipe2(mStopPipe, O_CLOEXEC | O_NONBLOCK) != 0) {
-      PLOG(ERROR) << "Failed to create touch monitor stop pipe";
-      return;
+    void onFingerDown(uint32_t x, uint32_t y, float /*minor*/, float /*major*/) {
+        LOG(DEBUG) << __func__ << "x: " << x << ", y: " << y;
+        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_X, x);
+        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_Y, y);
+        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_PRESSED);
     }
-    // The retry deadline is armed from the HAL callback thread while the
-    // monitor sleeps in poll(); this fd makes that thread wake up.
-    mWakeFd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
-    if (mWakeFd < 0)
-      PLOG(WARNING) << "Failed to create touch monitor wake event";
-    mMonitorThread = std::thread(&SM8750UdfpsHandler::monitorTouch, this);
-  }
 
-  void onFingerDown(uint32_t x, uint32_t y, float /*minor*/, float /*major*/) {
-    LOG(DEBUG) << __func__ << "x: " << x << ", y: " << y;
-    // Stock mfp-daemon does not trigger capture from the framework overlay.
-    // Keep these coordinates only as a fallback if the touch input node is
-    // absent.
-    mFrameworkX = x;
-    mFrameworkY = y;
-    if (mInputUnavailable && mPhysicalPressed)
-      maybeSendPress();
-  }
-
-  void onFingerUp() { LOG(DEBUG) << __func__; }
-
-  void onUiReady() { LOG(DEBUG) << __func__; }
-
-  void onEnrollStarted() {
-    LOG(INFO) << __func__;
-    startOperation();
-  }
-
-  void onAuthenticateStarted() {
-    LOG(INFO) << __func__;
-    startOperation();
-  }
-
-  void onAcquired(int32_t result, int32_t vendorCode) {
-    LOG(DEBUG) << __func__ << " result: " << result
-               << " vendorCode: " << vendorCode;
-    // Goodix reports 201 before CRC code 41; consuming it would block retry.
-    if (!mIsGoodix &&
-        static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR &&
-        (vendorCode == 201 || vendorCode == 202)) {
-      // QFP has rejected this sample, but the physical contact is still down.
-      // Do not synthesize pointer-up here: QFP uses the up transition to take
-      // an air reference, which must happen only after the finger is gone.
-      mContactConsumed = true;
+    void onFingerUp() {
+        LOG(DEBUG) << __func__;
+        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_X, 0);
+        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_Y, 0);
+        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_RELEASED);
     }
-    if (mIsGoodix &&
-        static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR &&
-        vendorCode == GOODIX_CRC_VENDOR_CODE) {
-      // Observed on goodix_us: each tap ends ~100ms later in
-      // GF_ERROR_SPI_RAW_DATA_CRC_FAILED while the finger is still down, and
-      // Session swallows the vendor code so the UI stays inert. The user
-      // perceives this as "tap repeatedly until it reacts". Emulate the next
-      // tap in software while the contact lasts. Bounded so a persistently
-      // failing sensor cannot spin on one press.
-      if (mOperationActive && mPhysicalPressed && !mContactConsumed &&
-          mCaptureSent && mRetryCount < GOODIX_MAX_RETRIES &&
-          mRetryDeadlineMs.load() == 0) {
-        const int32_t attempt = ++mRetryCount;
-        // Session::notify runs on the HAL callback thread; re-entering the
-        // HAL with extCmd here risks deadlock, and the sensor only reports
-        // its reset IRQ ~25ms after the CRC failure. Only arm the retry:
-        // monitorTouch() runs it once the delay expired, so every extCmd
-        // stays on the thread that already drives the other interactions and
-        // the handler destructor's join remains the single owner.
-        mRetryGeneration = mPressGeneration.load();
-        mRetryDeadlineMs = nowMs() + GOODIX_RETRY_DELAY_MS;
-        wakeMonitor();
-        LOG(INFO) << "Scheduling Goodix FOD retry, attempt " << attempt;
-      }
-    }
-  }
 
-  void onEnrollmentProgress(uint32_t remaining) {
-    if (remaining == 0) {
-      stopOperation();
-    } else if (mOperationActive) {
-      setTouchMode(TOUCH_MODE_FOD_AUTH, 1);
-    }
-  }
-
-  void onError() { stopOperation(); }
-
-  bool shouldForwardAcquired(int32_t result, int32_t vendorCode) {
-    // QFP uses vendor acquired 28 to report an unusable ultrasonic sample.
-    // Forward it so enrollment can give feedback instead of appearing inert.
-    return static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR &&
-           vendorCode == 28;
-  }
-
-  void cancel() {
-    LOG(INFO) << __func__;
-    stopOperation();
-  }
-
-  void onAuthenticationSucceeded() { stopOperation(); }
-
-  void onAuthenticationFailed() {
-    if (mOperationActive)
-      setTouchMode(TOUCH_MODE_FOD_AUTH, 1);
-  }
-
-private:
-  void startOperation() {
-    // The touch panel keeps reporting only changed values, so the last known
-    // coordinates stay valid across touches; reset capture state only.
-    mCaptureSent = false;
-    mContactConsumed = false;
-    mRetryCount = 0;
-    mRetryDeadlineMs = 0;
-    wakeMonitor();
-    mPhysicalPressed = false;
-    mOperationActive = true;
-    mDevice->extCmd(mDevice, COMMAND_DISPLAY_STATUS, DISPLAY_STATUS_ON);
-    setTouchMode(TOUCH_MODE_FOD_ENABLE, 1);
-    setTouchMode(TOUCH_MODE_FOD_AUTH, 1);
-  }
-
-  void stopOperation() {
-    if (!mOperationActive.exchange(false))
-      return;
-    sendRelease();
-    setTouchMode(TOUCH_MODE_FOD_AUTH, 0);
-    setTouchMode(TOUCH_MODE_FOD_ENABLE, 0);
-  }
-
-  void sendRelease() {
-    if (mCaptureSent.exchange(false)) {
-      mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_X, 0);
-      mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_Y, 0);
-      mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_RELEASED);
-      LOG(INFO) << "Forwarded physical FOD release";
-    }
-  }
-
-  void maybeSendPress() {
-    if (!mOperationActive || !mPhysicalPressed || mCaptureSent ||
-        mContactConsumed)
-      return;
-
-    int32_t x = mTouchX;
-    int32_t y = mTouchY;
-    if ((x <= 0 || y <= 0) && mInputUnavailable) {
-      x = mFrameworkX;
-      y = mFrameworkY;
-    }
-    if (x <= 0 || y <= 0)
-      return;
-
-    mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_X, x);
-    mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_Y, y);
-    mDevice->extCmd(mDevice, COMMAND_FILM_MODE, getTouchFilmMode());
-    mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_PRESSED);
-    mCaptureSent = true;
-    LOG(INFO) << "Forwarded physical FOD press at " << x << "," << y;
-  }
-
-  void handlePressState(bool pressed) {
-    if (pressed == mPhysicalPressed.exchange(pressed))
-      return;
-
-    if (pressed) {
-      mPressGeneration++;
-      // Stock mfp-daemon drives intr2 only for the qcom_us backend. Driving
-      // that GPIO while goodix_us owns the sensor disrupts its SPI capture.
-      if (mUseQcomIntr2)
-        writeState(QCOM_US_INTR2_PATH, true);
-      writeState(DISPLAY_PRE_POWER_PATH, true);
-      // Stock posts its QFP down notification asynchronously after changing
-      // the touch-panel auth state. Our direct extCmd path is synchronous, so
-      // arm the panel before starting capture.
-      if (mOperationActive && !mIsGoodix)
-        setTouchMode(TOUCH_MODE_FOD_AUTH, 0);
-      maybeSendPress();
-      // For every backend, stock mfp-daemon clears the FOD auth state on
-      // finger down, after posting the down command and film mode. goodix_us
-      // hands the capture to its own worker thread, so keep that order.
-      if (mOperationActive && mIsGoodix)
-        setTouchMode(TOUCH_MODE_FOD_AUTH, 0);
-    } else {
-      if (mUseQcomIntr2)
-        writeState(QCOM_US_INTR2_PATH, false);
-      writeState(DISPLAY_PRE_POWER_PATH, false);
-      sendRelease();
-      mContactConsumed = false;
-      mRetryCount = 0;
-      mRetryDeadlineMs = 0;
-      if (mOperationActive)
-        setTouchMode(TOUCH_MODE_FOD_AUTH, 1);
-    }
-  }
-
-  void handleInputEvents(int inputFd) {
-    input_event events[16];
-    ssize_t bytes;
-    while ((bytes = TEMP_FAILURE_RETRY(read(inputFd, events, sizeof(events)))) >
-           0) {
-      size_t count = static_cast<size_t>(bytes) / sizeof(input_event);
-      for (size_t i = 0; i < count; i++) {
-        const auto &event = events[i];
-        if (event.type != EV_ABS)
-          continue;
-        if (event.code == ABS_MT_SLOT) {
-          selectSlot(event.value);
-          continue;
+    void onAcquired(int32_t result, int32_t vendorCode) {
+        LOG(DEBUG) << __func__ << " result: " << result << " vendorCode: " << vendorCode;
+        if (static_cast<AcquiredInfo>(result) == AcquiredInfo::VENDOR &&
+           (vendorCode == 201 || vendorCode == 202)) {
+            onFingerUp();
         }
-        TouchSlot &slot = mSlots[mCurrentSlot];
-        if (event.code == ABS_MT_TRACKING_ID) {
-          slot.trackingId = event.value;
-          // A contact that comes down without moving an axis reports no
-          // position for it; the slot still holds the coordinates.
-          if (event.value >= 0)
-            publishSlot(mCurrentSlot);
-        } else if (event.value > 0 && event.code == ABS_MT_POSITION_X) {
-          slot.x = event.value / mResolutionFactor;
-          publishSlot(mCurrentSlot);
-        } else if (event.value > 0 && event.code == ABS_MT_POSITION_Y) {
-          slot.y = event.value / mResolutionFactor;
-          publishSlot(mCurrentSlot);
-        }
-      }
-    }
-    maybeSendPress();
-  }
-
-  void selectSlot(int32_t slot) {
-    if (slot < 0 || slot >= mSlotCount)
-      return;
-    mCurrentSlot = slot;
-  }
-
-  // The panel keeps X/Y after a finger-up, so a re-touch that does not move an
-  // axis never reports that axis again and the stored value stays valid.
-  void publishSlot(int32_t slot) {
-    const TouchSlot &state = mSlots[slot];
-    if (state.x <= 0 || state.y <= 0)
-      return;
-    mTouchX = state.x;
-    mTouchY = state.y;
-  }
-
-  // Seed the slot state with what the panel currently holds, so a finger that
-  // is already down when the node is opened does not have to move first.
-  void initTouchSlots(int inputFd) {
-    struct input_absinfo absInfo = {};
-    mSlotCount = 1;
-    mCurrentSlot = 0;
-    // ABS_MT_SLOT reports the current slot in .value and the highest usable
-    // slot index in .maximum.
-    if (ioctl(inputFd, EVIOCGABS(ABS_MT_SLOT), &absInfo) >= 0) {
-      if (absInfo.maximum >= 0) {
-        const int32_t slots = absInfo.maximum + 1;
-        mSlotCount = slots < MAX_TOUCH_SLOTS ? slots : MAX_TOUCH_SLOTS;
-      }
-      selectSlot(absInfo.value);
     }
 
-    int32_t values[MAX_TOUCH_SLOTS] = {};
-    if (queryMtSlots(inputFd, mSlotCount, ABS_MT_TRACKING_ID, values)) {
-      for (int32_t i = 0; i < mSlotCount; i++)
-        mSlots[i].trackingId = values[i];
-    }
-    if (queryMtSlots(inputFd, mSlotCount, ABS_MT_POSITION_X, values)) {
-      for (int32_t i = 0; i < mSlotCount; i++)
-        mSlots[i].x = values[i] > 0 ? values[i] / mResolutionFactor : 0;
-    }
-    if (queryMtSlots(inputFd, mSlotCount, ABS_MT_POSITION_Y, values)) {
-      for (int32_t i = 0; i < mSlotCount; i++)
-        mSlots[i].y = values[i] > 0 ? values[i] / mResolutionFactor : 0;
+    void cancel() {
+        LOG(INFO) << __func__;
     }
 
-    for (int32_t i = 0; i < mSlotCount; i++) {
-      if (mSlots[i].trackingId >= 0) {
-        publishSlot(i);
-        break;
-      }
-    }
-  }
-
-  void wakeMonitor() {
-    if (mWakeFd < 0)
-      return;
-    const uint64_t value = 1;
-    TEMP_FAILURE_RETRY(write(mWakeFd, &value, sizeof(value)));
-  }
-
-  void maybeRunRetry() {
-    const int64_t deadline = mRetryDeadlineMs.load();
-    if (deadline == 0 || nowMs() < deadline)
-      return;
-
-    mRetryDeadlineMs = 0;
-    if (mStop || !mOperationActive || !mPhysicalPressed || mContactConsumed ||
-        !mCaptureSent || mRetryGeneration.load() != mPressGeneration.load())
-      return;
-
-    LOG(INFO) << "Retrying Goodix FOD capture, attempt " << mRetryCount.load();
-    sendRelease();
-    maybeSendPress();
-  }
-
-  void monitorTouch() {
-    int statusFd =
-        open(FOD_PRESS_STATUS_PATH, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
-    if (statusFd < 0) {
-      PLOG(ERROR) << "Failed to open " << FOD_PRESS_STATUS_PATH;
-      return;
-    }
-
-    int inputFd = openTouchInput();
-    mInputUnavailable = inputFd < 0;
-    if (mInputUnavailable)
-      LOG(WARNING) << "Touch input unavailable; using overlay coordinates";
-    else
-      initTouchSlots(inputFd);
-
-    char initialState = '0';
-    TEMP_FAILURE_RETRY(pread(statusFd, &initialState, sizeof(initialState), 0));
-
-    pollfd fds[] = {
-        {.fd = mStopPipe[0], .events = POLLIN},
-        {.fd = mWakeFd, .events = POLLIN},
-        {.fd = statusFd, .events = POLLERR | POLLPRI},
-        {.fd = inputFd, .events = POLLIN},
-    };
-
-    while (!mStop) {
-      // Wait for a touch event, but wake up for a pending retry as well.
-      const int64_t retryDeadline = mRetryDeadlineMs.load();
-      int timeout = -1;
-      if (retryDeadline != 0) {
-        const int64_t now = nowMs();
-        timeout = retryDeadline > now ? static_cast<int>(retryDeadline - now)
-                                      : 0;
-      }
-
-      int count = TEMP_FAILURE_RETRY(poll(fds, 4, timeout));
-      if (count > 0) {
-        if (fds[0].revents & POLLIN) {
-          char value;
-          TEMP_FAILURE_RETRY(read(mStopPipe[0], &value, sizeof(value)));
-          break;
-        }
-
-        // A retry was armed from the HAL callback thread; drain the counter so
-        // the next iteration recomputes its timeout from the new deadline.
-        if (fds[1].revents & POLLIN) {
-          uint64_t value;
-          TEMP_FAILURE_RETRY(read(mWakeFd, &value, sizeof(value)));
-        }
-
-        if (inputFd >= 0 && (fds[3].revents & POLLIN))
-          handleInputEvents(inputFd);
-        if (fds[2].revents & (POLLERR | POLLPRI)) {
-          char state = '0';
-          if (TEMP_FAILURE_RETRY(pread(statusFd, &state, sizeof(state), 0)) ==
-              1) {
-            handlePressState(state == '1');
-          }
-        }
-      }
-
-      maybeRunRetry();
-    }
-
-    if (inputFd >= 0)
-      close(inputFd);
-    close(statusFd);
-  }
-
-  fingerprint_device_t *mDevice = nullptr;
-  std::thread mMonitorThread;
-  int mStopPipe[2] = {-1, -1};
-  int mWakeFd = -1;
-  int32_t mResolutionFactor = 1;
-  bool mUseQcomIntr2 = false;
-  bool mIsGoodix = false;
-  // Owned by monitorTouch(); the published coordinates stay atomic because
-  // the HAL callback thread reads them.
-  TouchSlot mSlots[MAX_TOUCH_SLOTS];
-  int32_t mSlotCount = 1;
-  int32_t mCurrentSlot = 0;
-  std::atomic_bool mStop = false;
-  std::atomic_bool mOperationActive = false;
-  std::atomic_bool mPhysicalPressed = false;
-  std::atomic_bool mCaptureSent = false;
-  std::atomic_bool mContactConsumed = false;
-  std::atomic<int32_t> mRetryCount = 0;
-  std::atomic<int64_t> mRetryDeadlineMs = 0;
-  std::atomic<uint32_t> mRetryGeneration = 0;
-  std::atomic<uint32_t> mPressGeneration = 0;
-  std::atomic_bool mInputUnavailable = true;
-  std::atomic<int32_t> mTouchX = 0;
-  std::atomic<int32_t> mTouchY = 0;
-  std::atomic<int32_t> mFrameworkX = 0;
-  std::atomic<int32_t> mFrameworkY = 0;
+  private:
+    fingerprint_device_t* mDevice;
 };
 
-static UdfpsHandler *create() { return new SM8750UdfpsHandler(); }
+static UdfpsHandler* create() {
+    return new SM8750UdfpsHandler();
+}
 
-static void destroy(UdfpsHandler *handler) { delete handler; }
+static void destroy(UdfpsHandler* handler) {
+    delete handler;
+}
 
 extern "C" UdfpsHandlerFactory UDFPS_HANDLER_FACTORY = {
-    .create = create,
-    .destroy = destroy,
+        .create = create,
+        .destroy = destroy,
 };

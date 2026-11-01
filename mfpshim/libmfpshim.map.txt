@@ -1,0 +1,13 @@
+# The interposed symbols carry the versions that mfp-daemon requires from libbinder_ndk, so that the bionic
+# linker binds the daemon's versioned references (AServiceManager_addService@LIBBINDER_NDK, ...) to this library.
+LIBBINDER_NDK {
+  global:
+    AServiceManager_addService;
+  local:
+    *;
+};
+
+LIBBINDER_NDK31 {
+  global:
+    AServiceManager_registerLazyService;
+} LIBBINDER_NDK;

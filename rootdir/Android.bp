@@ -52,6 +52,13 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "init.mfp-daemon.rc",
+    src: "etc/init.mfp-daemon.rc",
+    sub_dir: "init",
+    vendor: true,
+}
+
+prebuilt_etc {
     name: "init.haptics.rc",
     src: "etc/init.haptics.rc",
     sub_dir: "init",

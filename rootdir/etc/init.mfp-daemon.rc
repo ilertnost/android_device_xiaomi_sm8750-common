@@ -1,0 +1,19 @@
+# Stock Xiaomi fingerprint daemon (odm), taken from the stock global init.mfp-daemon.aidl.rc.
+# Not boot-critical: class late_start. No fpsensor_socket (jiiov sensor only; needs its own socket label).
+service mfp-daemon /odm/bin/hw/mfp-daemon
+    interface aidl android.hardware.biometrics.fingerprint.IFingerprint/default
+    interface aidl vendor.qti.hardware.fingerprint.IQfpExtendedFingerprint/default
+    class late_start
+    user system
+    group system drmrpc diag input uhid
+    seclabel u:r:vendor_mfp-daemon:s0
+    # libmfpshim: maps the AIDL V5 pointer calls and drives the FOD (see device/xiaomi/sm8750-common/mfpshim)
+    setenv LD_PRELOAD libmfpshim.so
+    capabilities SYS_NICE
+
+on property:vendor.fps_hal.restartimes=max
+    stop mfp-daemon
+
+on property:vendor.fp.dummy.dfs=*
+    stop mfp-daemon
+    start mfp-daemon

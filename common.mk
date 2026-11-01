@@ -120,7 +120,13 @@ PRODUCT_PACKAGES += \
 
 # Fingerprint
 PRODUCT_PACKAGES += \
-    libudfpshandler
+    android.hardware.biometrics.fingerprint-V4-ndk.vendor \
+    android.hardware.biometrics.common-V4-ndk.vendor \
+    android.hardware.biometrics.common.config.vendor \
+    android.hardware.biometrics.common.thread.vendor \
+    android.hardware.biometrics.common.util.vendor \
+    init.mfp-daemon.rc \
+    libmfpshim
 
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.fingerprint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.fingerprint.xml

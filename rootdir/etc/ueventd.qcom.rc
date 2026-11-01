@@ -58,6 +58,14 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Fingerprint (mfp-daemon): nodes of the Xiaomi FP driver
+/dev/mifp_id                                                         0666   system   system
+/dev/xiaomi-fp                                                       0666   system   system
+/sys/devices/platform/soc/soc:xiaomi_fingerprint intr2               0660   system   system
+/sys/devices/platform/soc/soc:xiaomi_fingerprint intr2_ap_per_low    0664   system   system
+/sys/devices/platform/soc/soc:xiaomi_fingerprint fingerdown          0664   system   graphics
+/sys/devices/virtual/touch/touch_dev fod_low_attn                    0664   system   system
+
 # Lineage Health charging control
 /sys/class/qcom-battery/cc_toggle                                    0660   system   system
 /sys/devices/platform/soc/soc:smart_charge/smart_batt                0660   root     root
