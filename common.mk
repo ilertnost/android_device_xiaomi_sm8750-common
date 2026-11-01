@@ -28,6 +28,10 @@ $(call inherit-product, hardware/qcom-caf/common/common.mk)
 # SHIPPING API
 PRODUCT_SHIPPING_API_LEVEL := 35
 
+# Our prebuilt 6.6.144 kernel disables KMI/ABI enforcement, so its compatible
+# DLKM modules must not be rejected by the generic kernel FCM config check.
+PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := false
+
 # AAPT
 PRODUCT_AAPT_CONFIG := normal
 PRODUCT_AAPT_PREF_CONFIG := xxhdpi
@@ -141,6 +145,7 @@ PRODUCT_PACKAGES += \
     android.hardware.graphics.mapper@4.0-impl-qti-display \
     libgralloc.qti \
     vendor.qti.hardware.display.composer-service \
+    vendor.qti.hardware.display.snapalloc-impl \
     vendor.qti.hardware.display.config-V12-ndk.vendor \
     vendor.qti.hardware.memtrack-service
 
