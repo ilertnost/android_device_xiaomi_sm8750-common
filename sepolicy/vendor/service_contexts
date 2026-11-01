@@ -18,6 +18,7 @@ vendor.xiaomi.sensor.citsensorservice.ICitSensorService/default   u:object_r:ven
 # Displayfeature
 vendor.xiaomi.hardware.display.mihwcextension.IMiHwcExtension/default       u:object_r:vendor_hal_hwcextension_xiaomi_service:s0
 vendor.xiaomi.hardware.displayfeature_aidl.IDisplayFeature/default       u:object_r:vendor_hal_displayfeature_xiaomi_service:s0
+vendor.xiaomi.hardware.framecapturemanager.IFrameCaptureManager/default u:object_r:vendor_hal_framecapturemanager_service:s0
 
 # Dolby
 android.hardware.media.c2.IComponentStore/default9                   u:object_r:hal_codec2_service:s0

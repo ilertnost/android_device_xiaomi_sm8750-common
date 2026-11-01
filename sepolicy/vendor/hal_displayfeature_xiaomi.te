@@ -1,6 +1,7 @@
 type vendor_hal_displayfeature_xiaomi_default, domain;
 type vendor_hal_displayfeature_xiaomi_default_exec, exec_type, file_type, vendor_file_type;
 type vendor_hal_displayfeature_xiaomi_service, hal_service_type, protected_service, service_manager_type;
+type vendor_hal_framecapturemanager_service, hal_service_type, protected_service, service_manager_type;
 
 binder_use(vendor_hal_displayfeature_xiaomi_default)
 hal_client_domain(vendor_hal_displayfeature_xiaomi_default, hal_graphics_allocator)
@@ -10,6 +11,7 @@ hal_client_domain(vendor_hal_displayfeature_xiaomi_default, vendor_hal_display_p
 hal_server_domain(vendor_hal_displayfeature_xiaomi_default, hal_graphics_composer)
 hal_server_domain(vendor_hal_displayfeature_xiaomi_default, vendor_hal_displayfeature_xiaomi)
 init_daemon_domain(vendor_hal_displayfeature_xiaomi_default)
+add_service(vendor_hal_displayfeature_xiaomi_default, vendor_hal_framecapturemanager_service)
 unix_socket_connect(vendor_hal_displayfeature_xiaomi_default, property, vendor_sensors)
 vndbinder_use(vendor_hal_displayfeature_xiaomi)
 

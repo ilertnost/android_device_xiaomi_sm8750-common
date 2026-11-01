@@ -41,6 +41,7 @@ allow vendor_mfp-daemon vendor_mfp-daemon:unix_stream_socket { create bind liste
 
 # Properties
 get_prop(vendor_mfp-daemon, vendor_panel_info_prop)
+get_prop(vendor_mfp-daemon, vendor_sensors_prop)
 set_prop(vendor_mfp-daemon, vendor_fp_prop)
 
 # Capabilities

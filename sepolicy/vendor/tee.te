@@ -8,5 +8,5 @@ allow tee vendor_fingerprint_data_file:file create_file_perms;
 
 # QFP TA needs access to fpdump directory for finger detect preparation (prepareForFD).
 # Without this, sensor1StartFingerDetect returns status -23 and enrollment hangs.
-allow tee vendor_fingerprint_data_file_fpdump:dir rw_dir_perms;
+allow tee vendor_fingerprint_data_file_fpdump:dir create_dir_perms;
 allow tee vendor_fingerprint_data_file_fpdump:file create_file_perms;
