@@ -77,6 +77,7 @@ PRODUCT_PACKAGES += \
     libtinyalsav2.vendor \
     libmediautils_vendor.vendor \
     libaudiohalvendorextn \
+    audioeffectservice_qti.xml \
     manifest_audiocorehal_default.xml \
     qtiaudiohalvendorextn
 

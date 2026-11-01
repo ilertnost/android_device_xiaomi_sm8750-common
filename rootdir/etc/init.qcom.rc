@@ -109,7 +109,9 @@ on early-boot
     exec u:r:vendor_qti_init_shell:s0 -- /vendor/bin/init.qcom.early_boot.sh
     exec u:r:vendor_qti_init_shell:s0 -- /vendor/bin/init.qti.can.sh
     setprop ro.sf.lcd_density ${vendor.display.lcd_density}
-    setprop vendor.display.mixer_resolution ${persist.sys.miui_resolution}
+    # dada: vendor.display.mixer_resolution takes "WxH" in the CAF composer; persist.sys.miui_resolution is
+    # "W,H,dpi" (Xiaomi) -> UBSan add-overflow abort in sdm::Debug::GetMixerResolution, so it is not propagated.
+    # setprop vendor.display.mixer_resolution ${persist.sys.miui_resolution}
     mkdir /data/vendor/modem 0777 root root
     mkdir /data/vendor/modem/diag_logs 0777 root root
 
@@ -734,8 +736,8 @@ on property:sys.shutdown.requested=*
     write /sys/kernel/shutdown_wlan/shutdown 1
     stop cnss-daemon
 
-on property:persist.sys.miui_resolution=*
-    setprop vendor.display.mixer_resolution ${persist.sys.miui_resolution}
+# on property:persist.sys.miui_resolution=*
+#    setprop vendor.display.mixer_resolution ${persist.sys.miui_resolution}
 
 service dhcpcd_bt-pan /system/bin/dhcpcd -BKLG
     class late_start

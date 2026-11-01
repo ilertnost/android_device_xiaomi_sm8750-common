@@ -5,6 +5,8 @@
         <interface>
             <name>IVibrator</name>
             <instance>default</instance>
+            <!-- registered by the odm vibratorfeature service -->
+            <instance>vibratorfeature</instance>
         </interface>
     </hal>
     <hal format="aidl" optional="true">

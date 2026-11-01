@@ -1,6 +1,26 @@
 <manifest version="8.0" type="device" target-level="202404">
+    <hal format="aidl">
+        <name>vendor.qti.sla.service</name>
+        <fqname>ISlaAIDLService/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.xiaomi.aidl.minet</name>
+        <fqname>IMiNetAIDLService/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.xiaomi.aidl.miwill</name>
+        <fqname>IMiwillAIDLService/default</fqname>
+    </hal>
     <hal format="aidl" override="true">
         <name>android.hardware.vibrator</name>
         <fqname>IVibrator/default</fqname>
+        <!-- the odm vibratorfeature service also registers this instance and aborts if undeclared -->
+        <fqname>IVibrator/vibratorfeature</fqname>
+    </hal>
+    <!-- Miracast HDCP (stock wfdhdcphalservice) -->
+    <hal format="aidl">
+        <name>android.hardware.drm</name>
+        <version>1</version>
+        <fqname>IDrmFactory/wfdhdcp</fqname>
     </hal>
 </manifest>
