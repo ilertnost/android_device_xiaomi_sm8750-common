@@ -7,8 +7,7 @@ service mfp-daemon /odm/bin/hw/mfp-daemon
     user system
     group system drmrpc diag input uhid
     seclabel u:r:vendor_mfp-daemon:s0
-    # libmfpshim: maps the AIDL V5 pointer calls and drives the FOD (see device/xiaomi/sm8750-common/mfpshim)
-    setenv LD_PRELOAD libmfpshim.so
+    # libmfpshim is a DT_NEEDED dependency of mfp-daemon; it maps AIDL V5 pointer calls and drives the FOD.
     capabilities SYS_NICE
 
 on property:vendor.fps_hal.restartimes=max

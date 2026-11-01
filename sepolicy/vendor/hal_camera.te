@@ -24,6 +24,7 @@ allow hal_camera_default camlog_device:chr_file { ioctl open read write };
 allow hal_camera_default hal_dynamic_camera_service:service_manager find;
 allow hal_camera_default migt_dev:chr_file rw_file_perms;
 allow hal_camera_default proc_pressure_mem:file { getattr open read write };
+allow hal_camera_default cgroup:file r_file_perms;
 allow hal_camera_default self:capability { fowner ipc_lock };
 # Xiaomi's encrypted imaging libraries decrypt their code and read-only data
 # in place during first use, then restore the original page protections.
@@ -72,6 +73,9 @@ dontaudit hal_camera_default default_prop:file read;
 
 # Camera blobs probe optional debug locations that are unavailable in production.
 dontaudit hal_camera_default fs_bpf:dir search;
+dontaudit hal_camera_default fs_bpf_vendor:dir search;
+dontaudit hal_camera_default kmsg_device:chr_file { open read };
+dontaudit hal_camera_default kernel:system syslog_read;
 dontaudit hal_camera_default shell_data_file:dir search;
 dontaudit hal_camera_default system_data_file:dir search;
 dontaudit hal_camera_default system_prop:file read;

@@ -1,4 +1,4 @@
-// libmfpshim: LD_PRELOAD shim for the stock Xiaomi mfp-daemon (see mfpshim.cpp)
+// libmfpshim: DT_NEEDED shim for the stock Xiaomi mfp-daemon (see mfpshim.cpp)
 cc_library_shared {
     name: "libmfpshim",
     vendor: true,

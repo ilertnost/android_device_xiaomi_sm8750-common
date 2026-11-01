@@ -291,7 +291,8 @@ vendor/lib64/libsdsprpc.so
 vendor/etc/charger_fw_fstab.qti
 
 # CIT Sensor
-odm/bin/hw/vendor.xiaomi.sensor.citsensorservice.aidl
+# Adapted Android 17 service verified on dada (crDroid/Lineage base).
+odm/bin/hw/vendor.xiaomi.sensor.citsensorservice.aidl|14c0989510fe350094bef59c722454b8aefc03f5
 odm/etc/init/vendor.xiaomi.sensor.citsensorservice.aidl.rc
 odm/etc/vintf/manifest/vendor.xiaomi.sensor.citsensorservice.aidl.xml
 vendor/lib64/vendor.xiaomi.sensor.citsensorservice-V1-ndk.so

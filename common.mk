@@ -62,6 +62,7 @@ PRODUCT_PACKAGES += \
 # Audio
 PRODUCT_PACKAGES += \
     android.media.audio.common.types-V6-ndk.vendor \
+    audioadsprpcd \
     audio.primary.default \
     audio.r_submix.default \
     audio.usb.default \

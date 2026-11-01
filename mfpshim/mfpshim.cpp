@@ -18,8 +18,7 @@
  * cancel and on the terminal callbacks (error, enrollment done, success, lockout, interaction detected, session
  * closed). For that it also wraps the session callback and the returned cancellation signal.
  *
- * Fix: loaded into mfp-daemon with LD_PRELOAD (rc; under enforcing SELinux init needs noatsecure for the daemon's
- * domain, see sm8750-common sepolicy init.te). It interposes AServiceManager_addService /
+ * Fix: loaded deterministically as a DT_NEEDED dependency of mfp-daemon. It interposes AServiceManager_addService /
  * AServiceManager_registerLazyService; when the daemon registers "android.hardware.biometrics.fingerprint.
  * IFingerprint/default", the local IFingerprint object is wrapped: every call is forwarded unchanged, except
  * onPointer{Down,Up,Cancel}WithContext -> onPointerDown / onPointerUp, and {enroll,authenticate,detectInteraction}
