@@ -49,6 +49,15 @@ lib_fixups: lib_fixups_user_type = {
 }
 
 blob_fixups: blob_fixups_user_type = {
+    # The AOSP Bluetooth audio module in libaudioserviceexampleimpl registers
+    # the generic provider, while Qualcomm's PAL offload client keeps sessions
+    # in libbluetooth_audio_session_aidl_qti. Route provider registration
+    # through our bridge so both sides use the same QTI session registry.
+    'vendor/lib64/libaudioserviceexampleimpl.so': blob_fixup()
+        .replace_needed(
+            'android.hardware.bluetooth.audio-impl.so',
+            'libbtaudioprovider_shim.so',
+        ),
     # AOSP does not ship Xiaomi's ODM audio module configuration. Carry its
     # four-microphone input layout into the extracted vendor configuration so
     # OZO spatial recording can open a genuine four-channel capture stream.

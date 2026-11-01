@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: Apache-2.0
+
+cc_library_shared {
+    name: "libbtaudioprovider_shim",
+    vendor: true,
+    srcs: ["BTAudioProviderShim.cpp"],
+    shared_libs: [
+        "libdl",
+        "liblog",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+}
