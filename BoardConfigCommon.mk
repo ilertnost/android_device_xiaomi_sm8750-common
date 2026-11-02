@@ -190,5 +190,9 @@ WIFI_HIDL_FEATURE_DUAL_INTERFACE := true
 WIFI_HIDL_UNIFIED_SUPPLICANT_SERVICE_RC_ENTRY := true
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 
+# Xiaomi's camera HAL selects its stream configuration using the client package
+# carried in this vendor session parameter.
+$(call soong_config_set,camera,package_name,com.xiaomi.sessionparams.clientName)
+
 # Inherit from the proprietary version
 include vendor/xiaomi/sm8750-common/BoardConfigVendor.mk

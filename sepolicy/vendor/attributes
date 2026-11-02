@@ -34,6 +34,8 @@ attribute hal_misyscore;
 attribute hal_misyscore_client;
 attribute hal_misyscore_server;
 
+hal_attribute(misys_camera)
+
 # Mlipay
 attribute hal_mlipay;
 attribute hal_mlipay_server;

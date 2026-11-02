@@ -99,6 +99,9 @@
 # Lights
 /odm/bin/hw/vendor\.qti\.hardware\.lights\.service u:object_r:hal_light_default_exec:s0
 
+# MiSys camera file service
+/vendor/bin/hw/vendor\.xiaomi\.hardware\.misys\.camera-service u:object_r:hal_misys_camera_default_exec:s0
+
 # GNSS
 /odm/bin/hw/android\.hardware\.gnss-aidl-service-qti u:object_r:vendor_hal_gnss_qti_exec:s0
 

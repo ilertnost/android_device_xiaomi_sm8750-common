@@ -1,0 +1,6 @@
+# MiSys file service for the stock camera app (stock: hypsys_vendor as vendor.misys.common)
+service vendor.misys.camera /vendor/bin/hw/vendor.xiaomi.hardware.misys.camera-service
+    class hal
+    user cameraserver
+    group camera
+    interface aidl vendor.xiaomi.hardware.misys.common.IMiSysImpl/default

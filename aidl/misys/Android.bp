@@ -1,0 +1,25 @@
+//
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+cc_binary {
+    name: "vendor.xiaomi.hardware.misys.camera-service",
+    srcs: ["service.cpp"],
+    vendor: true,
+    relative_install_path: "hw",
+    shared_libs: [
+        "libbase",
+        "libbinder_ndk",
+        "libcutils",
+        "vendor.xiaomi.hardware.misys.compat-V1-ndk",
+    ],
+    vintf_fragments: ["vendor.xiaomi.hardware.misys.camera-service.xml"],
+    init_rc: ["vendor.xiaomi.hardware.misys.camera-service.rc"],
+}
+
+// Path allowlist check (host): m misys_camera_paths_test && $OUT_DIR/host/linux-x86/nativetest64/...
+cc_test_host {
+    name: "misys_camera_paths_test",
+    srcs: ["paths_test.cpp"],
+}
